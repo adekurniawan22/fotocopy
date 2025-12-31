@@ -25,12 +25,15 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 
-    // Items (Menggunakan Resource Controller)
+    // Users
     Route::resource('users', UserController::class);
 
-    // Items (Menggunakan Resource Controller)
+    // Items
     Route::resource('items', ItemController::class);
 
     // Options
-    Route::resource('options', OptionController::class);
+    // Route::resource('options', OptionController::class);
+    Route::get('/options', function () {
+        return view('auth.coming-soon');
+    })->name('options.index');
 });

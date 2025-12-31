@@ -1,6 +1,16 @@
 {{-- Layout Utama --}}
 @extends('layouts.app')
 
+{{-- Breadcumbs --}}
+@section('breadcrumbs')
+    <ul class="breadcrumb breadcrumb-line fw-semibold fs-7 my-1">
+        <li class="breadcrumb-item text-gray-600">
+            <a href="{{ route('dashboard.index') }}" class="text-gray-600 text-hover-primary">Home</a>
+        </li>
+        <li class="breadcrumb-item text-gray-600">Dashboard</li>
+    </ul>
+@endsection
+
 {{-- Title --}}
 @section('title', 'Dashboard')
 @section('pageTitle', 'Dashboard')

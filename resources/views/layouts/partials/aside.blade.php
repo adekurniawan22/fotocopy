@@ -22,58 +22,11 @@
                     $route = Route::currentRouteName();
                 @endphp
 
-                {{-- 1. MENU DASHBOARD --}}
                 <div class="menu-item py-2 {{ Str::startsWith($route, 'dashboard') ? 'here show' : '' }}">
                     <a href="{{ route('dashboard.index') }}" class="menu-link menu-center" title="Dashboard"
                         data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="right">
                         <span class="menu-icon me-0 {{ Str::startsWith($route, 'dashboard') ? 'active' : '' }}">
                             <i class="ki-duotone ki-home fs-2x">
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-                            </i>
-                        </span>
-                    </a>
-                </div>
-
-                {{-- 4. MENU USER (HANYA MUNCUL JIKA USER ID == 1) --}}
-                @if (Auth::id() == 1)
-                    <div class="menu-item py-2 {{ Str::startsWith($route, 'users') ? 'here show' : '' }}">
-                        {{-- Pastikan route 'users.index' sudah dibuat di web.php --}}
-                        <a href="{{ route('users.index') }}" class="menu-link menu-center" title="Manajemen User"
-                            data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="right">
-                            <span class="menu-icon me-0 {{ Str::startsWith($route, 'users') ? 'active' : '' }}">
-                                {{-- Icon User --}}
-                                <i class="ki-duotone ki-user fs-2x">
-                                    <span class="path1"></span>
-                                    <span class="path2"></span>
-                                </i>
-                            </span>
-                        </a>
-                    </div>
-                @endif
-
-                {{-- 2. MENU ITEM (BARANG) --}}
-                <div class="menu-item py-2 {{ Str::startsWith($route, 'items') ? 'here show' : '' }}">
-                    <a href="{{ route('items.index') }}" class="menu-link menu-center" title="Data Barang"
-                        data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="right">
-                        <span class="menu-icon me-0 {{ Str::startsWith($route, 'items') ? 'active' : '' }}">
-                            <i class="ki-duotone ki-parcel fs-2x">
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-                                <span class="path3"></span>
-                                <span class="path4"></span>
-                                <span class="path5"></span>
-                            </i>
-                        </span>
-                    </a>
-                </div>
-
-                {{-- 3. MENU OPTION (PENGATURAN) --}}
-                <div class="menu-item py-2 {{ Str::startsWith($route, 'options') ? 'here show' : '' }}">
-                    <a href="{{ route('options.index') }}" class="menu-link menu-center" title="Pengaturan"
-                        data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="right">
-                        <span class="menu-icon me-0 {{ Str::startsWith($route, 'options') ? 'active' : '' }}">
-                            <i class="ki-duotone ki-setting-2 fs-2x">
                                 <span class="path1"></span>
                                 <span class="path2"></span>
                             </i>
@@ -95,6 +48,50 @@
                         </span>
                     </a>
                 </div>
+
+                @if (Auth::id() == 1)
+                    <div class="menu-item py-2 {{ Str::startsWith($route, 'users') ? 'here show' : '' }}">
+                        <a href="{{ route('users.index') }}" class="menu-link menu-center" title="Manajemen User"
+                            data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="right">
+                            <span class="menu-icon me-0 {{ Str::startsWith($route, 'users') ? 'active' : '' }}">
+                                {{-- Icon User --}}
+                                <i class="ki-duotone ki-user fs-2x">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                </i>
+                            </span>
+                        </a>
+                    </div>
+                @endif
+
+                <div class="menu-item py-2 {{ Str::startsWith($route, 'items') ? 'here show' : '' }}">
+                    <a href="{{ route('items.index') }}" class="menu-link menu-center" title="Data Barang"
+                        data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="right">
+                        <span class="menu-icon me-0 {{ Str::startsWith($route, 'items') ? 'active' : '' }}">
+                            <i class="ki-duotone ki-parcel fs-2x">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                                <span class="path3"></span>
+                                <span class="path4"></span>
+                                <span class="path5"></span>
+                            </i>
+                        </span>
+                    </a>
+                </div>
+
+                <div class="menu-item py-2 {{ Str::startsWith($route, 'options') ? 'here show' : '' }}">
+                    <a href="{{ route('options.index') }}" class="menu-link menu-center" title="Pengaturan"
+                        data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="right">
+                        <span class="menu-icon me-0 {{ Str::startsWith($route, 'options') ? 'active' : '' }}">
+                            <i class="ki-duotone ki-setting-2 fs-2x">
+                                <span class="path1"></span>
+                                <span class="path2"></span>
+                            </i>
+                        </span>
+                    </a>
+                </div>
+
+
             </div>
         </div>
     </div>

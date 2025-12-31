@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
@@ -71,8 +70,10 @@
                             Kami sedang bekerja untuk menghadirkan fitur ini sesegera mungkin. Silakan periksa kembali
                             di lain waktu.
                         </p>
-
-
+                        
+                        <div class="mb-10 mt-5">
+                            <a href="javascript:history.back()" class="btn btn-primary fw-bolder">Kembali ke Halaman Sebelumnya</a>
+                        </div>
                         <div class="mb-n5">
                             <img src="{{ asset('assets/media/auth/chart-graph.png') }}"
                                 class="mw-100 mh-300px theme-light-show" alt="" />

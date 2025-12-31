@@ -4,84 +4,75 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::all();
-        return response()->json($users);
+        $query = User::query();
+
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('user_name', 'like', "%{$search}%");
+            });
+        }
+
+        $users = $query->latest()->paginate(6);
+
+        if ($request->ajax()) {
+            return view('users.partials.table_data', compact('users'))->render();
+        }
+
+        return view('users.list', compact('users'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name'      => 'required|string|max:255',
-            'user_name' => 'required|string|max:255|unique:users',
+            'user_name' => 'required|string|max:255|unique:users,user_name',
             'password'  => 'required|string|min:6',
         ]);
 
-        $validated['password'] = Hash::make($request->password);
+        User::create($validated);
 
-        $user = User::create($validated);
-
-        return response()->json([
-            'message' => 'User created successfully',
-            'data'    => $user
-        ], 201);
+        return response()->json(['success' => 'Data user berhasil ditambahkan.']);
     }
 
     public function show($id)
     {
-        $user = User::find($id);
-
-        if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
-
+        $user = User::findOrFail($id);
         return response()->json($user);
     }
 
     public function update(Request $request, $id)
     {
-        $user = User::find($id);
+        $user = User::findOrFail($id);
 
-        if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
-
-        $validated = $request->validate([
-            'name'      => 'sometimes|required|string|max:255',
-            'user_name' => ['sometimes', 'required', Rule::unique('users')->ignore($user->user_id, 'user_id')],
+        $rules = [
+            'name'      => 'required|string|max:255',
+            'user_name' => 'required|string|max:255|unique:users,user_name,' . $id . ',user_id',
             'password'  => 'nullable|string|min:6',
-        ]);
+        ];
 
-        if ($request->filled('password')) {
-            $validated['password'] = Hash::make($request->password);
-        } else {
+        $validated = $request->validate($rules);
+
+        if (empty($validated['password'])) {
             unset($validated['password']);
         }
 
         $user->update($validated);
 
-        return response()->json([
-            'message' => 'User updated successfully',
-            'data'    => $user
-        ]);
+        return response()->json(['success' => 'Data user berhasil diperbarui.']);
     }
 
     public function destroy($id)
     {
-        $user = User::find($id);
-
-        if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
-
+        $user = User::findOrFail($id);
         $user->delete();
 
-        return response()->json(['message' => 'User deleted successfully']);
+        return response()->json(['success' => 'Data user berhasil dihapus.']);
     }
 }

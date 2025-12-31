@@ -53,6 +53,9 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="text-price">
                                 Rp {{ number_format($item->sell_price, 0, ',', '.') }}
+                                <small class="text-muted" style="font-size: 0.7em;">
+                                    / {{ $item->unit }}
+                                </small>
                             </div>
                         </div>
 
@@ -61,6 +64,10 @@
                             <div class="text-start mt-1 border-top pt-1 border-dashed">
                                 <small class="text-danger fw-bold" style="font-size: 0.8rem;">
                                     Beli: Rp {{ number_format($item->buy_price, 0, ',', '.') }}
+                                    {{-- PERUBAHAN DI SINI: Unit diperkecil sedikit lagi dari teks induk --}}
+                                    <span style="font-size: 0.8em; opacity: 0.8;">
+                                        / {{ $item->unit }}
+                                    </span>
                                 </small>
                             </div>
                         @endif
@@ -71,7 +78,7 @@
     @empty
         <div class="col-12 text-center py-5">
             <div class="my-5">
-                <img src="{{ asset('assets/media/svg/files/blank-image.svg') }}" class="h-100px mb-3"
+                <img src="{{ asset('assets/media/svg/files/blank-image.svg') }}" height="100px" class="mb-3"
                     style="opacity: 0.5">
                 <h4 class="text-gray-600">Tidak ada barang ditemukan</h4>
                 <p class="text-muted">Coba kata kunci pencarian yang lain.</p>

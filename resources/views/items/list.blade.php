@@ -390,7 +390,7 @@
         function clearFormErrors(form) {
             const target = form || $(CONFIG.selectors.form);
             target.find('.is-invalid').removeClass('is-invalid');
-            target.find('.invalid-feedback').hide();
+            target.find('.invalid-feedback').hide().text('').removeClass('d-block');
         }
 
         function toggleButtonLoading(btn, isLoading) {
