@@ -14,8 +14,6 @@ return Application::configure(basePath: dirname(__DIR__))
         // TAMBAHKAN ALIAS ANDA DI SINI
         $middleware->alias([
             // 'auth' dan 'guest' sudah otomatis ada
-            'role' => \App\Http\Middleware\CheckRole::class,
-            'is_active' => \App\Http\Middleware\EnsureUserIsActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

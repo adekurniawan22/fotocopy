@@ -2,7 +2,6 @@
     <div class="container-fluid d-flex flex-column flex-md-row flex-stack">
         @php
             $session = session('user_data');
-            $organization = \App\Models\Organization::find($session['organization_id']);
         @endphp
 
         <div class="text-gray-900 order-2 order-md-1 d-flex align-items-center flex-wrap">
@@ -10,13 +9,6 @@
             <a href="mailto:ade.kurniawan216@gmail.com" class="text-gray-500 fw-semibold text-hover-primary">
                 Ade Kurniawan
             </a>
-
-            @if ($organization)
-                <span class="text-gray-400 mx-2">•</span>
-                <span class="text-gray-500 fw-semibold">
-                    {{ $organization->organization_name }}
-                </span>
-            @endif
         </div>
 
         <ul class="menu menu-gray-600 menu-hover-primary fw-semibold order-1">

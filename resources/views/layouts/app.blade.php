@@ -75,9 +75,8 @@
             };
 
             if (title) config.title = title;
-            // Standarkan delay notifikasi sukses di sini jika perlu
             if (icon === 'success') {
-                config.timer = 2000; // 2 detik
+                config.timer = 2000;
                 config.showConfirmButton = false;
             }
 
@@ -93,11 +92,11 @@
                 confirmButtonText: "Ya, lanjutkan!",
                 cancelButtonText: "Batal",
                 customClass: {
-                    confirmButton: "btn btn-primary", // Standar "btn-primary"
-                    cancelButton: "btn btn-light" // Standar "btn-light"
+                    confirmButton: "btn btn-primary",
+                    cancelButton: "btn btn-light"
                 }
             };
-            // Untuk delete, Anda bisa override confirmButton jadi 'btn-danger' saat memanggil
+            
             if (icon === 'warning' && title && title.toLowerCase().includes('hapus')) {
                 config.customClass.confirmButton = "btn btn-danger";
             }
