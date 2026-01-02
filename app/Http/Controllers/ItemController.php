@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Item;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Laravel\Facades\Image; 
+use Intervention\Image\Laravel\Facades\Image;
 
 class ItemController extends Controller
 {
@@ -36,8 +36,6 @@ class ItemController extends Controller
             'buy_price'   => 'required|numeric|min:0',
             'sell_price'  => 'required|numeric|min:0',
             'unit'        => 'required|string|max:50',
-            'letak'       => 'nullable|string|max:100',
-            'location'    => 'nullable|string|max:100',
             'description' => 'nullable|string',
             'foto.*'      => 'nullable|image|mimes:jpeg,png,jpg,gif|max:15360',
         ]);
@@ -70,11 +68,9 @@ class ItemController extends Controller
             'buy_price'   => 'required|numeric|min:0',
             'sell_price'  => 'required|numeric|min:0',
             'unit'        => 'required|string|max:50',
-            'letak'       => 'nullable|string|max:100',
-            'location'    => 'nullable|string|max:100',
             'description' => 'nullable|string',
             'foto.*'      => 'nullable|image|mimes:jpeg,png,jpg,gif|max:15360',
-            'saved_fotos' => 'nullable|array', 
+            'saved_fotos' => 'nullable|array',
         ]);
 
         $keptPhotos = $request->input('saved_fotos', []);
@@ -125,10 +121,6 @@ class ItemController extends Controller
         return response()->json(['success' => 'Data barang berhasil dihapus.']);
     }
 
-    /**
-     * Fungsi Helper Private untuk Kompresi Gambar
-     * Agar tidak menulis kode yang sama berulang kali di store dan update
-     */
     private function uploadAndCompress($file)
     {
         $filename = uniqid() . '.' . $file->getClientOriginalExtension();
@@ -137,7 +129,7 @@ class ItemController extends Controller
 
         $image->scaleDown(width: 1200);
 
-        $encoded = $image->toJpeg(quality: 80); 
+        $encoded = $image->toJpeg(quality: 80);
 
         Storage::disk('public')->put($path, $encoded);
 

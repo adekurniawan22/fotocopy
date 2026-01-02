@@ -45,7 +45,6 @@
         </div>
     </div>
 
-    {{-- Modal User --}}
     <div class="modal fade" id="kt_modal_user" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">

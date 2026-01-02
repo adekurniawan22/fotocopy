@@ -1,9 +1,27 @@
 <div class="row g-4">
     @forelse($items as $item)
         <div class="col-6 col-md-4 col-lg-3">
-            <div class="card card-custom h-100">
+            <div class="card card-custom h-100 position-relative">
+                @auth
+                    <div class="position-absolute top-0 end-0 p-2" style="z-index: 10;">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light btn-icon shadow-sm rounded-circle" type="button"
+                                data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v text-muted"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <li><a class="dropdown-item btn-edit-item" href="#" data-id="{{ $item->item_id }}"><i
+                                            class="fas fa-edit text-warning me-2"></i> Edit</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item btn-delete-item text-danger" href="#"
+                                        data-id="{{ $item->item_id }}"><i class="fas fa-trash me-2"></i> Hapus</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                @endauth
 
-                {{-- BAGIAN GAMBAR DENGAN LIGHTBOX --}}
                 <div class="card-img-wrapper">
                     @php
                         $photos = $item->foto;
@@ -12,65 +30,39 @@
                     @endphp
 
                     @if ($hasPhoto)
-                        {{-- 1. Gambar Utama (Bisa diklik untuk Lightbox) --}}
                         <a class="d-block w-100 h-100" data-fslightbox="gallery-{{ $item->item_id }}"
                             href="{{ asset('storage/' . $firstPhoto) }}">
                             <img src="{{ asset('storage/' . $firstPhoto) }}" alt="{{ $item->item_name }}">
                         </a>
-
-                        {{-- 2. Gambar Sisanya (Hidden, tapi masuk ke slide Lightbox yang sama) --}}
                         @foreach (array_slice($photos, 1) as $nextPhoto)
                             <a class="d-none" data-fslightbox="gallery-{{ $item->item_id }}"
                                 href="{{ asset('storage/' . $nextPhoto) }}"></a>
                         @endforeach
                     @else
-                        {{-- Jika tidak ada foto, tampilkan placeholder (Tanpa Lightbox) --}}
                         <img src="{{ asset('assets/media/svg/files/blank-image.svg') }}" alt="No Image">
                     @endif
                 </div>
 
-                <div class="card-body d-flex flex-column">
-                    <div class="mb-2">
-                        <span class="badge badge-custom">{{ $item->unit }}</span>
-                    </div>
-
-                    <h5 class="fw-bold mb-1 text-dark text-truncate" title="{{ $item->item_name }}">
+                <div class="card-body d-flex flex-column p-3">
+                    <h6 class="fw-bold mb-3 text-dark lh-sm">
                         {{ $item->item_name }}
-                    </h5>
+                    </h6>
 
-                    @if ($item->location)
-                        <small class="text-muted d-block mb-3">
-                            <i class="fas fa-map-marker-alt me-1"></i> {{ $item->location }}
-                        </small>
-                    @else
-                        <small class="text-muted d-block mb-3">
-                            <i class="fas fa-map-marker-alt me-1"></i> Tidak ada informasi
-                        </small>
-                    @endif
-
-                    <div class="mt-auto d-flex flex-column">
-                        {{-- Harga Jual --}}
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="text-price">
-                                Rp {{ number_format($item->sell_price, 0, ',', '.') }}
-                                <small class="text-muted" style="font-size: 0.7em;">
-                                    / {{ $item->unit }}
-                                </small>
-                            </div>
+                    <div class="mt-auto">
+                        <div class="text-price mb-1">
+                            Rp {{ number_format($item->sell_price, 0, ',', '.') }}
+                            <small class="text-muted fw-normal fs-7">/ {{ $item->unit }}</small>
                         </div>
 
-                        {{-- LOGIC HARGA BELI (Hanya User ID 1) --}}
-                        @if (Auth::check() && Auth::id() == 1)
-                            <div class="text-start mt-1 border-top pt-1 border-dashed">
-                                <small class="text-danger fw-bold" style="font-size: 0.8rem;">
-                                    Beli: Rp {{ number_format($item->buy_price, 0, ',', '.') }}
-                                    {{-- PERUBAHAN DI SINI: Unit diperkecil sedikit lagi dari teks induk --}}
-                                    <span style="font-size: 0.8em; opacity: 0.8;">
-                                        / {{ $item->unit }}
-                                    </span>
-                                </small>
+                        @auth
+                            <div class="border-top pt-2 mt-2 border-dashed">
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">Modal:</small>
+                                <span class="text-danger fw-bold" style="font-size: 0.9rem;">
+                                    Rp {{ number_format($item->buy_price, 0, ',', '.') }}
+                                    <small class="text-muted fw-normal fs-7">/ {{ $item->unit }}</small>
+                                </span>
                             </div>
-                        @endif
+                        @endauth
                     </div>
                 </div>
             </div>
@@ -81,7 +73,6 @@
                 <img src="{{ asset('assets/media/svg/files/blank-image.svg') }}" height="100px" class="mb-3"
                     style="opacity: 0.5">
                 <h4 class="text-gray-600">Tidak ada barang ditemukan</h4>
-                <p class="text-muted">Coba kata kunci pencarian yang lain.</p>
             </div>
         </div>
     @endforelse

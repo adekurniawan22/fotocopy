@@ -17,7 +17,6 @@
     <meta property="og:url" content="https://keenthemes.com/metronic" />
     <meta property="og:site_name" content="Metronic by Keenthemes" />
     <link rel="canonical" href="http://preview.keenthemes.comauthentication/general/coming-soon.html" />
-    <link rel="shortcut icon" href="{{ asset('assets/media/logos/logo-simpati-pdkb.png') }}" type="image/png" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
     <link href="{{ asset('assets/plugins/global/plugins.bundle.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/css/style.bundle.css') }}" rel="stylesheet" type="text/css" />
@@ -70,9 +69,10 @@
                             Kami sedang bekerja untuk menghadirkan fitur ini sesegera mungkin. Silakan periksa kembali
                             di lain waktu.
                         </p>
-                        
+
                         <div class="mb-10 mt-5">
-                            <a href="javascript:history.back()" class="btn btn-primary fw-bolder">Kembali ke Halaman Sebelumnya</a>
+                            <a href="javascript:history.back()" class="btn btn-primary fw-bolder">Kembali ke Halaman
+                                Sebelumnya</a>
                         </div>
                         <div class="mb-n5">
                             <img src="{{ asset('assets/media/auth/chart-graph.png') }}"

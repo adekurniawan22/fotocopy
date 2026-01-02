@@ -54,7 +54,6 @@
                         <a href="{{ route('users.index') }}" class="menu-link menu-center" title="Manajemen User"
                             data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="right">
                             <span class="menu-icon me-0 {{ Str::startsWith($route, 'users') ? 'active' : '' }}">
-                                {{-- Icon User --}}
                                 <i class="ki-duotone ki-user fs-2x">
                                     <span class="path1"></span>
                                     <span class="path2"></span>

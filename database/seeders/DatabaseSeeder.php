@@ -24,22 +24,17 @@ class DatabaseSeeder extends Seeder
 
         // 2. Daftar Barang Realistis (ATK & Fotocopy)
         $items = [
-            // Kertas
             ['name' => 'Kertas HVS A4 70gsm Sidu', 'unit' => 'Rim', 'base_price' => 42000],
             ['name' => 'Kertas HVS F4 70gsm Sidu', 'unit' => 'Rim', 'base_price' => 48000],
             ['name' => 'Kertas HVS A4 80gsm PaperOne', 'unit' => 'Rim', 'base_price' => 55000],
             ['name' => 'Kertas Foto Glossy A4 210gsm', 'unit' => 'Pack', 'base_price' => 35000],
             ['name' => 'Kertas Buffalo Warna Campur', 'unit' => 'Pack', 'base_price' => 25000],
-
-            // Alat Tulis
             ['name' => 'Pulpen Standard AE7 Hitam', 'unit' => 'Pcs', 'base_price' => 2500],
             ['name' => 'Pulpen Pilot Ballliner Hitam', 'unit' => 'Pcs', 'base_price' => 14000],
             ['name' => 'Pensil 2B Faber Castell', 'unit' => 'Pcs', 'base_price' => 4000],
             ['name' => 'Penghapus Joyko Hitam Kecil', 'unit' => 'Pcs', 'base_price' => 1000],
             ['name' => 'Spidol Boardmarker Snowman Hitam', 'unit' => 'Pcs', 'base_price' => 8500],
             ['name' => 'Tipe-X Kertas (Correction Tape) Kenko', 'unit' => 'Pcs', 'base_price' => 6000],
-
-            // Perlengkapan Kantor
             ['name' => 'Stapler HD-10 Kenko', 'unit' => 'Pcs', 'base_price' => 12000],
             ['name' => 'Isi Staples No. 10 (Kecil)', 'unit' => 'Box', 'base_price' => 2500],
             ['name' => 'Lakban Bening Daimaru 2 Inch', 'unit' => 'Roll', 'base_price' => 11000],
@@ -47,19 +42,13 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Lem Fox Stick 60gr', 'unit' => 'Pcs', 'base_price' => 8000],
             ['name' => 'Gunting Besar Joyko', 'unit' => 'Pcs', 'base_price' => 15000],
             ['name' => 'Cutter Besar Kenko L-500', 'unit' => 'Pcs', 'base_price' => 18000],
-
-            // File & Dokumen
             ['name' => 'Map Plastik Button Folder Clear', 'unit' => 'Pcs', 'base_price' => 3000],
             ['name' => 'Map Kertas Batik', 'unit' => 'Pcs', 'base_price' => 1500],
             ['name' => 'Ordner Bantex Kwitansi', 'unit' => 'Pcs', 'base_price' => 35000],
             ['name' => 'Buku Tulis Sidu 38 Lembar', 'unit' => 'Pack', 'base_price' => 32000],
-
-            // Aksesoris Komputer / Lainnya
             ['name' => 'Flashdisk SanDisk 32GB Cruzer Blade', 'unit' => 'Pcs', 'base_price' => 65000],
             ['name' => 'Mouse Logitech B100 Optical', 'unit' => 'Pcs', 'base_price' => 55000],
             ['name' => 'Baterai ABC Alkaline AA (Isi 2)', 'unit' => 'Set', 'base_price' => 12000],
-
-            // Barang Aset / Mahal (Contoh)
             ['name' => 'Printer Epson L1210 EcoTank', 'unit' => 'Unit', 'base_price' => 2100000],
         ];
 

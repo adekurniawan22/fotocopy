@@ -12,7 +12,6 @@
                 <tr>
                     <td>
                         <div class="d-flex align-items-center">
-                            {{-- Avatar Inisial --}}
                             <div class="symbol symbol-50px me-3">
                                 <div class="symbol-label fs-2 fw-semibold bg-light-primary text-primary">
                                     {{ strtoupper(substr($user->name, 0, 1)) }}

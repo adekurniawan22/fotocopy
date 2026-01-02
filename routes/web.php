@@ -7,17 +7,15 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\OptionController;
+use Illuminate\Support\Facades\Artisan;
 
-// 1. Halaman Depan (Daftar Item)
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// 2. Routes Authentication (Guest Only)
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
 });
 
-// 3. Route Logout (Auth Only)
 Route::get('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 Route::get('/logout-katalog', [AuthController::class, 'logoutKatalog'])->middleware('auth')->name('logout.katalog');
 
@@ -36,4 +34,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/options', function () {
         return view('auth.coming-soon');
     })->name('options.index');
+});
+
+Route::get('/clean', function () {
+    Artisan::call('config:clear');
+    Artisan::call('view:clear');
+    Artisan::call('route:clear');
+    return "Cache, Config, View, dan Route sudah dibersihkan!";
 });

@@ -67,7 +67,7 @@
                             </span>
 
                             <span class="text-muted fs-7">
-                                Beli: Rp {{ number_format($item->buy_price, 0, ',', '.') }}
+                                Modal: Rp {{ number_format($item->buy_price, 0, ',', '.') }}
                             </span>
                         </div>
                     </td>

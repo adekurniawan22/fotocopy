@@ -92,11 +92,11 @@
 
                             <div class="row">
                                 <div class="col-md-4 fv-row mb-7">
-                                    <label class="required fw-semibold fs-6 mb-2">Harga Beli</label>
+                                    <label class="required fw-semibold fs-6 mb-2">Harga Modal</label>
                                     <div class="input-group input-group-solid">
                                         <span class="input-group-text">Rp</span>
                                         <input type="text" name="buy_price"
-                                            class="form-control form-control-solid rupiah-input" placeholder="0" />
+                                            class="form-control form-control-solid rupiah-input" placeholder="0" value="0" />
                                     </div>
                                     <div class="invalid-feedback d-block" id="buy_price_error"></div>
                                 </div>
@@ -113,22 +113,15 @@
 
                                 <div class="col-md-4 fv-row mb-7">
                                     <label class="required fw-semibold fs-6 mb-2">Satuan</label>
-                                    <input type="text" name="unit" class="form-control form-control-solid"
-                                        placeholder="Pcs/Unit/Box" />
+                                    <select name="unit" class="form-select form-select-solid">
+                                        <option value="Pcs" selected>Pcs</option>
+                                        <option value="Pack">Pack</option>
+                                        <option value="Lusin">Lusin</option>
+                                        <option value="Sepasang">Sepasang</option>
+                                        <option value="Kotak">Kotak</option>
+                                        <option value="Lembar">Lembar</option>
+                                    </select>
                                     <div class="invalid-feedback" id="unit_error"></div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6 fv-row mb-7">
-                                    <label class="fw-semibold fs-6 mb-2">Letak (Rak/Etalase)</label>
-                                    <input type="text" name="letak" class="form-control form-control-solid"
-                                        placeholder="Contoh: Rak A1" />
-                                </div>
-                                <div class="col-md-6 fv-row mb-7">
-                                    <label class="fw-semibold fs-6 mb-2">Lokasi (Gudang/Toko)</label>
-                                    <input type="text" name="location" class="form-control form-control-solid"
-                                        placeholder="Contoh: Gudang Belakang" />
                                 </div>
                             </div>
 
@@ -205,7 +198,7 @@
         };
 
         const formatRupiah = (angka) => {
-            if (!angka) return '';
+            if (!angka && angka !== 0) return '';
             let num = typeof angka === 'string' ? parseFloat(angka.toString().replace(/\./g, '').replace(',', '.')) :
                 angka;
             if (isNaN(num)) return '';
@@ -278,6 +271,11 @@
             formEl.attr('action', CONFIG.urls.store);
             formEl.find('[name="_method"]').val('POST');
             formEl.find('[name="item_id"]').val('');
+            
+            formEl.find('[name="buy_price"]').val('0');
+            
+            formEl.find('[name="unit"]').val('Pcs');
+            
             $(CONFIG.selectors.modalTitle).text('Tambah Barang');
 
             $(CONFIG.selectors.photoContainer).empty();
@@ -291,7 +289,7 @@
         function loadEntityData(id) {
             const url = `${CONFIG.urls.base}/${id}`;
             const formEl = $(CONFIG.selectors.form);
-            const mainModal = new bootstrap.Modal(document.querySelector(CONFIG.selectors.modal));
+            const mainModal = bootstrap.Modal.getOrCreateInstance(document.querySelector(CONFIG.selectors.modal));
 
             resetModalForm();
 
@@ -318,8 +316,6 @@
             formEl.find('[name="buy_price"]').val(formatRupiah(data.buy_price));
             formEl.find('[name="sell_price"]').val(formatRupiah(data.sell_price));
             formEl.find('[name="unit"]').val(data.unit);
-            formEl.find('[name="letak"]').val(data.letak);
-            formEl.find('[name="location"]').val(data.location);
             formEl.find('[name="description"]').val(data.description);
 
             $(CONFIG.selectors.photoContainer).empty();
@@ -428,9 +424,9 @@
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
                 success: (response) => {
-                    const modalInstance = bootstrap.Modal.getInstance(document.querySelector(CONFIG.selectors
-                        .modal));
-                    if (modalInstance) modalInstance.hide();
+                    const modalEl = document.querySelector(CONFIG.selectors.modal);
+                    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    modalInstance.hide();
 
                     Swal.fire("Berhasil", CONFIG.messages.success, "success");
                     fetchTableData();
@@ -450,7 +446,7 @@
             let searchTimer;
             const modalEl = document.querySelector(CONFIG.selectors.modal);
             const formEl = $(CONFIG.selectors.form);
-            const mainModal = new bootstrap.Modal(modalEl);
+            const mainModal = bootstrap.Modal.getOrCreateInstance(modalEl);
 
             $(CONFIG.selectors.searchInput).on('keyup', function() {
                 clearTimeout(searchTimer);
@@ -502,21 +498,4 @@
             });
         });
     </script>
-@endpush
-
-@push('styles')
-    <style>
-        .image-input-placeholder {
-            background-image: url('{{ asset('assets/media/svg/files/blank-image.svg') }}');
-        }
-
-        [data-bs-theme="dark"] .image-input-placeholder {
-            background-image: url('{{ asset('assets/media/svg/files/blank-image-dark.svg') }}');
-        }
-
-        .image-input {
-            margin-right: 10px;
-            margin-bottom: 10px;
-        }
-    </style>
 @endpush

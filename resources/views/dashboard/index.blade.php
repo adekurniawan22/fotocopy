@@ -24,7 +24,8 @@
                     <div class="card-body d-flex align-items-center p-0">
                         <div class="d-flex flex-column flex-grow-1 py-2 py-lg-13 px-5">
                             <span class="fw-bold text-white fs-4 mb-2">Total Barang</span>
-                            <span class="fw-bolder fs-2x">{{ number_format($totalItems) }} <span class="fs-4 fw-bold">Unit</span></span>
+                            <span class="fw-bolder fs-2x">{{ number_format($totalItems) }} <span
+                                    class="fs-4 fw-bold">Unit</span></span>
                         </div>
                         <div class="d-flex align-items-center justify-content-center p-5" style="opacity: 0.8">
                             <i class="fas fa-box-open fa-5x text-white"></i>
@@ -38,7 +39,8 @@
                     <div class="card-body d-flex align-items-center p-0">
                         <div class="d-flex flex-column flex-grow-1 py-2 py-lg-13 px-5">
                             <span class="fw-bold fs-4 mb-2">Total Pengguna</span>
-                            <span class="fw-bolder fs-2x">{{ number_format($totalUsers) }} <span class="fs-4 fw-bold">Orang</span></span>
+                            <span class="fw-bolder fs-2x">{{ number_format($totalUsers) }} <span
+                                    class="fs-4 fw-bold">Orang</span></span>
                         </div>
                         <div class="d-flex align-items-center justify-content-center p-5" style="opacity: 0.8">
                             <i class="fas fa-users fa-5x text-white"></i>
@@ -46,7 +48,7 @@
                     </div>
                 </div>
             </div>
-            
+
         </div>
 
         <div class="row g-5 g-xl-8">
@@ -69,21 +71,26 @@
                                 </thead>
                                 <tbody>
                                     @forelse($expensiveItems as $item)
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="d-flex justify-content-start flex-column">
-                                                    <span class="text-gray-900 fw-bold text-hover-primary fs-6">{{ $item->item_name }}</span>
-                                                    <span class="text-muted fw-semibold d-block fs-7">{{ $item->unit }}</span>
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="d-flex justify-content-start flex-column">
+                                                        <span
+                                                            class="text-gray-900 fw-bold text-hover-primary fs-6">{{ $item->item_name }}</span>
+                                                        <span
+                                                            class="text-muted fw-semibold d-block fs-7">{{ $item->unit }}</span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td class="text-end">
-                                            <span class="text-primary fw-bold d-block fs-6">Rp {{ number_format($item->sell_price, 0, ',', '.') }}</span>
-                                        </td>
-                                    </tr>
+                                            </td>
+                                            <td class="text-end">
+                                                <span class="text-primary fw-bold d-block fs-6">Rp
+                                                    {{ number_format($item->sell_price, 0, ',', '.') }}</span>
+                                            </td>
+                                        </tr>
                                     @empty
-                                    <tr><td colspan="2" class="text-center text-muted">Belum ada data</td></tr>
+                                        <tr>
+                                            <td colspan="2" class="text-center text-muted">Belum ada data</td>
+                                        </tr>
                                     @endforelse
                                 </tbody>
                             </table>
@@ -111,21 +118,26 @@
                                 </thead>
                                 <tbody>
                                     @forelse($cheapestItems as $item)
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="d-flex justify-content-start flex-column">
-                                                    <span class="text-gray-900 fw-bold text-hover-primary fs-6">{{ $item->item_name }}</span>
-                                                    <span class="text-muted fw-semibold d-block fs-7">{{ $item->unit }}</span>
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="d-flex justify-content-start flex-column">
+                                                        <span
+                                                            class="text-gray-900 fw-bold text-hover-primary fs-6">{{ $item->item_name }}</span>
+                                                        <span
+                                                            class="text-muted fw-semibold d-block fs-7">{{ $item->unit }}</span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td class="text-end">
-                                            <span class="text-success fw-bold d-block fs-6">Rp {{ number_format($item->sell_price, 0, ',', '.') }}</span>
-                                        </td>
-                                    </tr>
+                                            </td>
+                                            <td class="text-end">
+                                                <span class="text-success fw-bold d-block fs-6">Rp
+                                                    {{ number_format($item->sell_price, 0, ',', '.') }}</span>
+                                            </td>
+                                        </tr>
                                     @empty
-                                    <tr><td colspan="2" class="text-center text-muted">Belum ada data</td></tr>
+                                        <tr>
+                                            <td colspan="2" class="text-center text-muted">Belum ada data</td>
+                                        </tr>
                                     @endforelse
                                 </tbody>
                             </table>
