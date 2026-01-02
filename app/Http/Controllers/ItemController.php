@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Item;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Laravel\Facades\Image; 
 
 class ItemController extends Controller
 {
@@ -44,7 +45,7 @@ class ItemController extends Controller
         $fotoPaths = [];
         if ($request->hasFile('foto')) {
             foreach ($request->file('foto') as $file) {
-                $path = $file->store('items', 'public');
+                $path = $this->uploadAndCompress($file);
                 $fotoPaths[] = $path;
             }
         }
@@ -57,7 +58,6 @@ class ItemController extends Controller
     public function show($id)
     {
         $item = Item::findOrFail($id);
-
         return response()->json($item);
     }
 
@@ -93,7 +93,7 @@ class ItemController extends Controller
         $newPhotos = [];
         if ($request->hasFile('foto')) {
             foreach ($request->file('foto') as $file) {
-                $path = $file->store('items', 'public');
+                $path = $this->uploadAndCompress($file);
                 $newPhotos[] = $path;
             }
         }
@@ -123,5 +123,24 @@ class ItemController extends Controller
         $item->delete();
 
         return response()->json(['success' => 'Data barang berhasil dihapus.']);
+    }
+
+    /**
+     * Fungsi Helper Private untuk Kompresi Gambar
+     * Agar tidak menulis kode yang sama berulang kali di store dan update
+     */
+    private function uploadAndCompress($file)
+    {
+        $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+        $path = 'items/' . $filename;
+        $image = Image::read($file);
+
+        $image->scaleDown(width: 1200);
+
+        $encoded = $image->toJpeg(quality: 80); 
+
+        Storage::disk('public')->put($path, $encoded);
+
+        return $path;
     }
 }
