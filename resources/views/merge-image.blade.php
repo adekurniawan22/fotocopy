@@ -227,7 +227,12 @@
                 <i class="fas fa-layer-group text-primary me-2"></i>FOTOCOPY
             </a>
 
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <a href="{{ route('pas-foto.index') }}" class="btn btn-outline-primary fw-bold">
+                    <i class="fas fa-id-badge"></i>
+                    <span class="d-none d-sm-inline ms-1">Pas Foto</span>
+                </a>
+
                 @auth
                     <div class="dropdown">
                         <button class="btn btn-light dropdown-toggle fw-bold text-dark" type="button"
@@ -252,6 +257,8 @@
                             </li>
                         </ul>
                     </div>
+                @else
+                    <a href="{{ route('login') }}" class="btn btn-primary fw-bold px-4">Login</a>
                 @endauth
             </div>
         </div>

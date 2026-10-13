@@ -9,9 +9,11 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\OptionController;
 use App\Http\Controllers\MergeImageController;
 use Illuminate\Support\Facades\Artisan;
+   use App\Http\Controllers\PasFotoController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/merge-image', [MergeImageController::class, 'index'])->name('merge-image.index');
+   Route::get('/pas-foto', [PasFotoController::class, 'index'])->name('pas-foto.index');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');

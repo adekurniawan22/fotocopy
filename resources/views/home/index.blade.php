@@ -221,6 +221,11 @@
                     <i class="fas fa-images"></i>
                     <span class="d-none d-sm-inline ms-1">Merge Image</span>
                 </a>
+
+                   <a href="{{ route('pas-foto.index') }}" class="btn btn-outline-primary fw-bold">
+       <i class="fas fa-id-badge"></i>
+       <span class="d-none d-sm-inline ms-1">Pas Foto</span>
+   </a>
                 @auth
                     <div class="dropdown">
                         <button class="btn btn-light dropdown-toggle fw-bold text-dark" type="button"
@@ -264,10 +269,6 @@
                     <i class="fas fa-plus me-1"></i> Tambah Barang Baru
                 </button>
             @endauth
-
-            <a href="{{ route('merge-image.index') }}" class="btn btn-sm btn-primary mb-4 ms-1">
-                <i class="fas fa-images me-1"></i> Merge Image
-            </a>
         </div>
     </div>
 
