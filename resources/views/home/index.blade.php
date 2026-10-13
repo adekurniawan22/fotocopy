@@ -216,7 +216,11 @@
                 <i class="fas fa-layer-group text-primary me-2"></i>FOTOCOPY
             </a>
 
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <a href="{{ route('merge-image.index') }}" class="btn btn-outline-primary fw-bold">
+                    <i class="fas fa-images"></i>
+                    <span class="d-none d-sm-inline ms-1">Merge Image</span>
+                </a>
                 @auth
                     <div class="dropdown">
                         <button class="btn btn-light dropdown-toggle fw-bold text-dark" type="button"
@@ -260,6 +264,10 @@
                     <i class="fas fa-plus me-1"></i> Tambah Barang Baru
                 </button>
             @endauth
+
+            <a href="{{ route('merge-image.index') }}" class="btn btn-sm btn-primary mb-4 ms-1">
+                <i class="fas fa-images me-1"></i> Merge Image
+            </a>
         </div>
     </div>
 
@@ -293,7 +301,7 @@
                                 <div class="col-12 mb-3">
                                     <label class="required fw-semibold fs-6 mb-2">Nama Barang</label>
                                     <input type="text" name="item_name" class="form-control form-control-solid"
-                                        placeholder="Contoh: Laptop Asus ROG" required/>
+                                        placeholder="Contoh: Laptop Asus ROG" required />
                                     <div class="invalid-feedback" id="item_name_error"></div>
                                 </div>
 
@@ -302,8 +310,7 @@
                                     <div class="input-group">
                                         <span class="input-group-text">Rp</span>
                                         <input type="text" inputmode="numeric" name="buy_price"
-                                            class="form-control rupiah-input" placeholder="0"
-                                            value="0" />
+                                            class="form-control rupiah-input" placeholder="0" value="0" />
                                     </div>
                                     <div class="invalid-feedback d-block" id="buy_price_error"></div>
                                 </div>
@@ -313,7 +320,7 @@
                                     <div class="input-group">
                                         <span class="input-group-text">Rp</span>
                                         <input type="text" inputmode="numeric" name="sell_price"
-                                            class="form-control rupiah-input" placeholder="0" required/>
+                                            class="form-control rupiah-input" placeholder="0" required />
                                     </div>
                                     <div class="invalid-feedback d-block" id="sell_price_error"></div>
                                 </div>
@@ -344,8 +351,7 @@
 
                                     <div id="photo_container" class="d-flex flex-wrap gap-2"></div>
 
-                                    <button type="button" class="btn btn-secondary btn-sm mt-4"
-                                        id="btn_add_photo">
+                                    <button type="button" class="btn btn-secondary btn-sm mt-4" id="btn_add_photo">
                                         <i class="fas fa-plus me-1"></i> Tambah Foto Lain
                                     </button>
                                     <div class="invalid-feedback d-block" id="foto_error"></div>
