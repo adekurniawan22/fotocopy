@@ -88,7 +88,7 @@
             border: 2px dashed #b5b5c3;
             border-radius: 0.85rem;
             background-color: #f8faff;
-            padding: 1.5rem 1rem;
+            padding: 1.25rem 1rem;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -101,13 +101,49 @@
         }
 
         .drop-zone i {
-            font-size: 2rem;
+            font-size: 1.8rem;
             color: #009ef7;
         }
 
         kbd {
             background-color: #181c32;
             font-size: 0.75rem;
+        }
+
+        /* --- Daftar Foto --- */
+        #photo_list {
+            max-height: 340px;
+            overflow-y: auto;
+        }
+
+        .photo-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0.6rem;
+            border-radius: 0.6rem;
+            background-color: #f5f8fa;
+            border: 2px solid transparent;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .photo-item:hover {
+            background-color: #eef3f7;
+        }
+
+        .photo-item.active {
+            border-color: #009ef7;
+            background-color: #eef6ff;
+        }
+
+        .photo-thumb {
+            width: 45px;
+            height: 60px;
+            border-radius: 0.3rem;
+            box-shadow: 0 0.1rem 0.5rem rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
         }
 
         /* --- Warna --- */
@@ -165,6 +201,7 @@
 
         /* --- Editor --- */
         .editor-wrap {
+            position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -185,14 +222,23 @@
             cursor: grabbing;
         }
 
+        .editor-overlay {
+            position: absolute;
+            left: 50%;
+            bottom: 1.5rem;
+            transform: translateX(-50%);
+            background-color: rgba(24, 28, 50, 0.8);
+            color: #fff;
+            font-size: 0.8rem;
+            padding: 0.35rem 0.8rem;
+            border-radius: 2rem;
+            white-space: nowrap;
+        }
+
         .size-tab.active {
             background-color: #009ef7;
             color: #fff;
             border-color: #009ef7;
-        }
-
-        .form-range::-webkit-slider-thumb {
-            background-color: #009ef7;
         }
 
         /* --- Pratinjau A4 --- */
@@ -285,10 +331,18 @@
                     <div class="card-title-sm"><span class="step-badge">1</span>Foto</div>
 
                     <div class="drop-zone" id="drop_zone">
-                        <i class="fas fa-user-circle mb-2"></i>
+                        <i class="fas fa-user-plus mb-2"></i>
                         <div class="fw-bold">Tempel foto dengan <kbd>Ctrl</kbd> + <kbd>V</kbd></div>
-                        <div class="text-muted fs-7 mt-1">atau seret foto ke sini, atau klik untuk memilih</div>
-                        <input type="file" id="file_input" accept="image/*" style="display:none">
+                        <div class="text-muted fs-7 mt-1">atau seret beberapa foto sekaligus, atau klik untuk memilih
+                        </div>
+                        <input type="file" id="file_input" accept="image/*" multiple style="display:none">
+                    </div>
+
+                    <div class="form-check form-switch mt-3">
+                        <input class="form-check-input" type="checkbox" id="auto_remove" checked>
+                        <label class="form-check-label" for="auto_remove">
+                            Hapus background otomatis untuk foto baru
+                        </label>
                     </div>
 
                     <div id="ai_status" class="mt-3" style="display:none">
@@ -301,46 +355,64 @@
                                 style="width: 100%"></div>
                         </div>
                     </div>
+
+                    <div id="photo_list" class="mt-3"></div>
                 </div>
 
-                {{-- 2. Warna --}}
+                {{-- 2. Foto Terpilih --}}
                 <div class="card card-panel p-4 mb-4">
-                    <div class="card-title-sm"><span class="step-badge">2</span>Warna Latar</div>
-                    <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <button type="button" class="swatch" data-color="#1565c0" title="Biru"
-                            style="background:#1565c0"></button>
-                        <button type="button" class="swatch" data-color="#d32f2f" title="Merah"
-                            style="background:#d32f2f"></button>
-                        <button type="button" class="swatch" data-color="#ffffff" title="Putih"
-                            style="background:#ffffff"></button>
-                        <input type="color" id="bg_color" class="form-control form-control-color"
-                            value="#1565c0" title="Warna lain">
-                        <span class="text-muted fs-7 ms-1">Klik kotak terakhir untuk warna lain</span>
-                    </div>
-                </div>
+                    <div class="card-title-sm"><span class="step-badge">2</span>Pengaturan <span
+                            id="active_title">Foto</span></div>
 
-                {{-- 3. Ukuran & Jumlah --}}
-                <div class="card card-panel p-4 mb-4">
-                    <div class="card-title-sm"><span class="step-badge">3</span>Ukuran &amp; Jumlah</div>
+                    <div id="no_photo_note" class="text-muted fs-7">Tambahkan foto terlebih dahulu.</div>
 
-                    <div id="size_list"></div>
+                    <div id="photo_settings" style="display:none">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="remove_bg">
+                            <label class="form-check-label fw-semibold" for="remove_bg">Hapus background</label>
+                            <span class="text-muted fs-7 ms-1" id="remove_bg_status"></span>
+                        </div>
 
-                    <div class="section-label mt-3">Tambah ukuran lain (cm)</div>
-                    <div class="d-flex gap-2 align-items-center">
-                        <input type="number" id="custom_w" class="form-control form-control-solid" min="1"
-                            max="20" step="0.1" placeholder="Lebar">
-                        <span class="text-muted">×</span>
-                        <input type="number" id="custom_h" class="form-control form-control-solid" min="1"
-                            max="28" step="0.1" placeholder="Tinggi">
-                        <button type="button" class="btn btn-light text-nowrap" id="btn_add_size">
-                            <i class="fas fa-plus me-1"></i> Tambah
+                        <div id="color_section" class="mb-4">
+                            <div class="section-label">Warna Latar</div>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <button type="button" class="swatch" data-color="#1565c0" title="Biru"
+                                    style="background:#1565c0"></button>
+                                <button type="button" class="swatch" data-color="#d32f2f" title="Merah"
+                                    style="background:#d32f2f"></button>
+                                <button type="button" class="swatch" data-color="#ffffff" title="Putih"
+                                    style="background:#ffffff"></button>
+                                <input type="color" id="bg_color" class="form-control form-control-color"
+                                    value="#1565c0" title="Warna lain">
+                                <span class="text-muted fs-7 ms-1">Kotak terakhir untuk warna lain</span>
+                            </div>
+                        </div>
+
+                        <div class="section-label">Ukuran &amp; Jumlah</div>
+                        <div id="size_list"></div>
+
+                        <button type="button" class="btn btn-sm btn-light w-100 mb-3" id="btn_copy_qty"
+                            style="display:none">
+                            <i class="fas fa-copy me-1"></i> Samakan jumlah ini ke semua foto
                         </button>
+
+                        <div class="section-label">Tambah ukuran lain (cm)</div>
+                        <div class="d-flex gap-2 align-items-center">
+                            <input type="number" id="custom_w" class="form-control form-control-solid" min="1"
+                                max="20" step="0.1" placeholder="Lebar">
+                            <span class="text-muted">×</span>
+                            <input type="number" id="custom_h" class="form-control form-control-solid" min="1"
+                                max="28" step="0.1" placeholder="Tinggi">
+                            <button type="button" class="btn btn-light text-nowrap" id="btn_add_size">
+                                <i class="fas fa-plus me-1"></i> Tambah
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                {{-- 4. Pengaturan Cetak --}}
+                {{-- 3. Pengaturan Cetak --}}
                 <div class="card card-panel p-4">
-                    <div class="card-title-sm"><span class="step-badge">4</span>Pengaturan Cetak</div>
+                    <div class="card-title-sm"><span class="step-badge">3</span>Pengaturan Cetak</div>
 
                     <div class="row g-3">
                         <div class="col-6">
@@ -393,12 +465,13 @@
                 <div class="card card-panel p-4 mb-4">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                         <div class="card-title-sm mb-0"><i class="fas fa-crop-alt text-primary me-2"></i>Atur
-                            Posisi</div>
+                            Posisi <span class="text-muted fw-normal" id="editor_title"></span></div>
                         <div class="btn-group btn-group-sm" id="size_tabs"></div>
                     </div>
 
                     <div class="editor-wrap mb-3">
                         <canvas id="editor"></canvas>
+                        <div class="editor-overlay" id="editor_overlay" style="display:none"></div>
                     </div>
 
                     <div id="edge_warning" class="alert alert-warning fs-7 py-2" style="display:none">
@@ -433,7 +506,8 @@
                     </div>
 
                     <details class="mt-2">
-                        <summary class="text-muted fs-7" style="cursor:pointer">Patokan posisi otomatis</summary>
+                        <summary class="text-muted fs-7" style="cursor:pointer">Patokan posisi otomatis (foto
+                            yang dihapus background-nya)</summary>
                         <div class="row g-3 mt-1">
                             <div class="col-md-6">
                                 <label class="section-label d-flex justify-content-between">
@@ -453,7 +527,8 @@
                             </div>
                         </div>
                         <div class="text-muted fs-7">Diukur dari tinggi pas foto. Garis putus-putus di foto
-                            menunjukkan patokan ini. Pengaturan tersimpan otomatis.</div>
+                            menunjukkan patokan ini. Foto tanpa hapus background diposisikan di tengah dan
+                            memenuhi bingkai.</div>
                     </details>
                 </div>
 
@@ -514,18 +589,31 @@
             const el = (id) => document.getElementById(id);
             const editor = el('editor');
 
-            let bgModule = null;
-            let cutout = null; // foto tanpa background (HTMLImageElement)
-            let head = null; // { cx, cy, h } posisi kepala dalam piksel foto
-            let edges = null; // bagian foto yang menyentuh tepi gambar
-            let baseK = 0; // skala hasil posisi otomatis
-            let pos = { ox: 0, oy: 0.35 }; // posisi kepala dalam satuan "tinggi pas foto"
+            /*
+             * Satu foto:
+             * { id, blob, url, img, w, h,           -> foto asli (sudah dirapikan rotasinya)
+             *   cutout, head, edges,                -> hasil hapus background
+             *   removeBg, status, color, qty,       -> pengaturan per foto
+             *   baseK, zoom, rotate, pos }          -> posisi di bingkai
+             * status: 'ready' | 'queued' | 'processing' | 'error'
+             */
+            let photos = [];
+            let activeId = null;
+            let uid = 0;
             let sizes = [];
             let activeSizeId = '3x4';
+            let lastColor = '#1565c0';
+            let bgModule = null;
+            let queueRunning = false;
             let busy = false;
             let previewTimer = null;
 
-            /* =============== Pengaturan =============== */
+            const activePhoto = () => photos.find(p => p.id === activeId) || null;
+            const hasCutout = (p) => !!(p && p.removeBg && p.cutout && p.head);
+            const totalQty = (p) => sizes.reduce((sum, s) => sum + (p.qty[s.id] || 0), 0);
+            const needsAi = (p) => p.removeBg && !p.cutout && p.status !== 'error';
+
+            /* =============== Pengaturan umum =============== */
             function num(id, fallback = 0) {
                 const v = parseFloat(el(id).value);
                 return isNaN(v) ? fallback : Math.max(0, v);
@@ -533,15 +621,13 @@
 
             function getSettings() {
                 return {
-                    color: el('bg_color').value,
                     margin: num('paper_margin', 3),
                     border: num('white_border', 2),
                     cutStyle: el('cut_style').value,
                     allowRotate: el('allow_rotate').checked,
+                    autoRemove: el('auto_remove').checked,
                     headPct: num('head_pct', 50),
                     topPct: num('top_pct', 10),
-                    zoom: num('zoom', 100),
-                    rotate: parseFloat(el('rotate').value) || 0,
                     filename: el('file_name').value.trim() || 'pas-foto'
                 };
             }
@@ -550,11 +636,12 @@
                 const s = getSettings();
                 try {
                     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-                        color: s.color,
+                        color: lastColor,
                         margin: s.margin,
                         border: s.border,
                         cutStyle: s.cutStyle,
                         allowRotate: s.allowRotate,
+                        autoRemove: s.autoRemove,
                         headPct: s.headPct,
                         topPct: s.topPct,
                         customSizes: sizes.filter(x => x.custom).map(x => ({ w: x.w, h: x.h }))
@@ -563,19 +650,19 @@
             }
 
             function loadSettings() {
+                sizes = DEFAULT_SIZES.map(s => ({ ...s, custom: false }));
                 let saved = null;
                 try {
                     saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
                 } catch (e) {}
-
-                sizes = DEFAULT_SIZES.map(s => ({ ...s, qty: 0, custom: false }));
                 if (!saved) return;
 
-                if (saved.color) el('bg_color').value = saved.color;
+                if (saved.color) lastColor = saved.color;
                 if (saved.margin !== undefined) el('paper_margin').value = saved.margin;
                 if (saved.border !== undefined) el('white_border').value = saved.border;
                 if (saved.cutStyle) el('cut_style').value = saved.cutStyle;
                 if (saved.allowRotate !== undefined) el('allow_rotate').checked = saved.allowRotate;
+                if (saved.autoRemove !== undefined) el('auto_remove').checked = saved.autoRemove;
                 if (saved.headPct) el('head_pct').value = saved.headPct;
                 if (saved.topPct) el('top_pct').value = saved.topPct;
                 (saved.customSizes || []).forEach(c => addSize(c.w, c.h, false));
@@ -593,45 +680,10 @@
                     if (notify) Swal.fire('Sudah ada', 'Ukuran ini sudah ada di daftar.', 'info');
                     return;
                 }
-                sizes.push({ id, w, h, qty: 0, custom: true });
+                sizes.push({ id, w, h, custom: true });
             }
 
-            function renderSizes() {
-                el('size_list').innerHTML = sizes.map(s => `
-                    <div class="size-row ${s.qty > 0 ? 'has-qty' : ''}">
-                        <span class="size-label">${sizeLabel(s)}</span>
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="input-group input-group-sm qty-group">
-                                <button class="btn btn-light qty-btn" type="button" data-id="${s.id}" data-step="-1"><i class="fas fa-minus"></i></button>
-                                <input type="number" class="form-control qty-input" min="0" max="200" value="${s.qty}" data-id="${s.id}">
-                                <button class="btn btn-light qty-btn" type="button" data-id="${s.id}" data-step="1"><i class="fas fa-plus"></i></button>
-                            </div>
-                            ${s.custom ? `<button type="button" class="btn btn-sm btn-light text-danger remove-size" data-id="${s.id}" title="Hapus ukuran"><i class="fas fa-trash"></i></button>` : ''}
-                        </div>
-                    </div>`).join('');
-                renderTabs();
-            }
-
-            function renderTabs() {
-                const used = sizes.filter(s => s.qty > 0);
-                const list = used.length ? used : sizes;
-                if (!list.some(s => s.id === activeSizeId)) activeSizeId = list[0].id;
-
-                el('size_tabs').innerHTML = list.map(s => `
-                    <button type="button" class="btn btn-outline-secondary size-tab ${s.id === activeSizeId ? 'active' : ''}" data-id="${s.id}">
-                        ${sizeLabel(s).replace(' cm', '')}
-                    </button>`).join('');
-            }
-
-            /* =============== Hapus background (AI) =============== */
-            function setAiStatus(text, pct = null) {
-                el('ai_status').style.display = text ? 'block' : 'none';
-                el('ai_status_text').textContent = text || '';
-                el('ai_status_pct').textContent = pct === null ? '' : pct + '%';
-                el('ai_progress').style.width = (pct === null ? 100 : pct) + '%';
-                el('ai_progress').classList.toggle('progress-bar-animated', pct === null);
-            }
-
+            /* =============== Membaca foto =============== */
             function loadImage(src) {
                 return new Promise((resolve, reject) => {
                     const img = new Image();
@@ -657,57 +709,145 @@
                 }
             }
 
-            async function processFile(file) {
-                if (busy) return;
-                if (!file || !(file.type || '').startsWith('image/')) {
+            async function addFiles(fileList) {
+                const files = Array.from(fileList || []).filter(f => (f.type || '').startsWith('image/'));
+                if (!files.length) {
                     Swal.fire('Bukan gambar', 'Pilih file foto (JPG/PNG).', 'warning');
                     return;
                 }
 
-                busy = true;
-                updateButtons();
-                try {
-                    setAiStatus('Menyiapkan foto...');
-                    const input = await normalizeImage(file);
+                const s = getSettings();
+                let firstNew = null;
+                let failed = 0;
 
-                    if (!bgModule) {
-                        setAiStatus('Memuat AI penghapus background...');
-                        bgModule = await import(BG_REMOVAL_URL);
+                for (const file of files) {
+                    try {
+                        const blob = await normalizeImage(file);
+                        const url = URL.createObjectURL(blob);
+                        const img = await loadImage(url);
+                        const p = {
+                            id: ++uid,
+                            blob, url, img,
+                            w: img.naturalWidth,
+                            h: img.naturalHeight,
+                            cutout: null,
+                            head: null,
+                            edges: null,
+                            removeBg: s.autoRemove,
+                            status: s.autoRemove ? 'queued' : 'ready',
+                            color: lastColor,
+                            qty: {},
+                            baseK: 1,
+                            zoom: 100,
+                            rotate: 0,
+                            pos: { ox: 0, oy: 0.5 }
+                        };
+                        autoPosition(p);
+                        photos.push(p);
+                        if (!firstNew) firstNew = p;
+                    } catch (e) {
+                        failed++;
                     }
+                }
 
-                    const result = await bgModule.removeBackground(input, {
-                        model: 'isnet_fp16',
-                        output: { format: 'image/png' },
-                        progress: (key, current, total) => {
-                            if (key.startsWith('fetch') && total) {
-                                setAiStatus('Mengunduh model AI (sekali saja)...', Math.round(current / total * 100));
-                            } else {
-                                setAiStatus('Menghapus background...');
+                if (firstNew) selectPhoto(firstNew.id);
+                if (failed) Swal.fire('Perhatian', `${failed} file tidak bisa dibaca dan dilewati.`, 'warning');
+                runQueue();
+            }
+
+            function removePhoto(id) {
+                const idx = photos.findIndex(p => p.id === id);
+                if (idx < 0) return;
+                const p = photos[idx];
+                if (p.status === 'processing') {
+                    Swal.fire('Tunggu sebentar', 'Foto ini sedang diproses. Hapus setelah selesai.', 'info');
+                    return;
+                }
+                URL.revokeObjectURL(p.url);
+                if (p.cutout) URL.revokeObjectURL(p.cutout.src);
+                photos.splice(idx, 1);
+                if (activeId === id) {
+                    const next = photos[idx] || photos[idx - 1];
+                    activeId = next ? next.id : null;
+                }
+                selectPhoto(activeId);
+            }
+
+            /* =============== Hapus background (AI), satu per satu =============== */
+            function setAiStatus(text, pct = null) {
+                el('ai_status').style.display = text ? 'block' : 'none';
+                el('ai_status_text').textContent = text || '';
+                el('ai_status_pct').textContent = pct === null ? '' : pct + '%';
+                el('ai_progress').style.width = (pct === null ? 100 : pct) + '%';
+                el('ai_progress').classList.toggle('progress-bar-animated', pct === null);
+            }
+
+            async function runQueue() {
+                if (queueRunning) return;
+                queueRunning = true;
+                let errors = 0;
+
+                try {
+                    while (true) {
+                        const p = photos.find(needsAi);
+                        if (!p) break;
+
+                        const left = photos.filter(needsAi).length;
+                        const label = `Menghapus background Foto ${photos.indexOf(p) + 1}` +
+                            (left > 1 ? ` (sisa ${left} foto)` : '') + '...';
+                        p.status = 'processing';
+                        setAiStatus(label);
+                        refreshAll();
+
+                        try {
+                            if (!bgModule) {
+                                setAiStatus('Memuat AI penghapus background...');
+                                bgModule = await import(BG_REMOVAL_URL);
                             }
-                        }
-                    });
+                            const result = await bgModule.removeBackground(p.blob, {
+                                model: 'isnet_fp16',
+                                output: { format: 'image/png' },
+                                progress: (key, current, total) => {
+                                    if (key.startsWith('fetch') && total) {
+                                        setAiStatus('Mengunduh model AI (sekali saja)...',
+                                            Math.round(current / total * 100));
+                                    } else {
+                                        setAiStatus(label);
+                                    }
+                                }
+                            });
 
-                    setAiStatus('Mengatur posisi...');
-                    if (cutout) URL.revokeObjectURL(cutout.src);
-                    cutout = await loadImage(URL.createObjectURL(result));
-                    analyzeCutout();
-                    autoPosition();
-                    setAiStatus('');
-                    el('drop_zone').querySelector('.fw-bold').innerHTML =
-                        'Ganti foto: tempel <kbd>Ctrl</kbd> + <kbd>V</kbd>';
-                } catch (err) {
-                    console.error(err);
-                    setAiStatus('');
-                    Swal.fire('Gagal', 'Background tidak bisa dihapus. Periksa koneksi internet lalu coba lagi.', 'error');
+                            if (!photos.includes(p)) continue; // foto sudah dihapus
+                            p.cutout = await loadImage(URL.createObjectURL(result));
+                            Object.assign(p, analyzeCutout(p.cutout));
+                            p.status = 'ready';
+                            if (p.removeBg) autoPosition(p);
+                        } catch (err) {
+                            console.error(err);
+                            errors++;
+                            p.status = 'error';
+                            p.removeBg = false;
+                            autoPosition(p);
+                        }
+                        if (p.id === activeId) syncControls();
+                        refreshAll();
+                    }
                 } finally {
-                    busy = false;
-                    updateButtons();
+                    queueRunning = false;
+                    setAiStatus('');
                     refreshAll();
+                }
+
+                if (errors) {
+                    Swal.fire('Sebagian gagal',
+                        `${errors} foto tidak bisa dihapus background-nya. Foto tersebut dipakai apa adanya. ` +
+                        'Periksa koneksi internet, lalu nyalakan lagi "Hapus background" untuk mencoba ulang.',
+                        'warning');
                 }
             }
 
             /* =============== Deteksi posisi kepala =============== */
-            function analyzeCutout() {
+            function analyzeCutout(cutout) {
                 const iw = cutout.naturalWidth;
                 const ih = cutout.naturalHeight;
                 const SW = 200;
@@ -734,12 +874,10 @@
                     if (L[y] >= 0) W[y] = R[y] - L[y] + 1;
                 }
 
-                let top = W.findIndex(w => w >= 3);
-                let bottom = SH - 1 - [...W].reverse().findIndex(w => w >= 3);
+                const top = W.findIndex(w => w >= 3);
+                const bottom = SH - 1 - [...W].reverse().findIndex(w => w >= 3);
                 if (top < 0) {
-                    head = { cx: iw / 2, cy: ih * 0.3, h: ih * 0.4 };
-                    edges = null;
-                    return;
+                    return { head: { cx: iw / 2, cy: ih * 0.3, h: ih * 0.4 }, edges: null };
                 }
 
                 // Cari bahu: lebar tiba-tiba melonjak dibanding lebar kepala
@@ -782,60 +920,170 @@
                 }
                 const cx = n ? sum / n : SW / 2;
 
-                head = {
-                    cx: cx / sf,
-                    cy: (top + headH / 2) / sf,
-                    h: headH / sf
-                };
-
-                edges = {
-                    bottom: W[SH - 1] > 0,
-                    left: L.some(v => v === 0),
-                    right: R.some(v => v === SW - 1)
+                return {
+                    head: { cx: cx / sf, cy: (top + headH / 2) / sf, h: headH / sf },
+                    edges: {
+                        bottom: W[SH - 1] > 0,
+                        left: L.some(v => v === 0),
+                        right: R.some(v => v === SW - 1)
+                    }
                 };
             }
 
-            function autoPosition() {
-                if (!cutout || !head) return;
+            /* =============== Posisi =============== */
+            // pos & ukuran dalam satuan "tinggi pas foto"
+            function autoPosition(p) {
                 const s = getSettings();
-                const target = s.headPct / 100;
-                baseK = target / head.h;
-                pos = { ox: 0, oy: s.topPct / 100 + target / 2 };
-                el('zoom').value = 100;
-                el('rotate').value = 0;
-                updateSliderLabels();
-                refreshAll();
+                if (hasCutout(p)) {
+                    const target = s.headPct / 100;
+                    p.baseK = target / p.head.h;
+                    p.pos = { ox: 0, oy: s.topPct / 100 + target / 2 };
+                } else {
+                    // Tanpa hapus background: foto di tengah & memenuhi bingkai
+                    const used = sizes.filter(x => (p.qty[x.id] || 0) > 0);
+                    const list = used.length ? used : sizes;
+                    const maxRatio = Math.max(...list.map(x => x.w / x.h));
+                    p.baseK = Math.max(maxRatio / p.w, 1 / p.h);
+                    p.pos = { ox: 0, oy: 0.5 };
+                }
+                p.zoom = 100;
+                p.rotate = 0;
             }
 
-            /* =============== Menggambar pas foto =============== */
-            // Hpx = tinggi pas foto dalam piksel; semua posisi relatif terhadap tinggi
-            function drawPhoto(ctx, Wpx, Hpx, s) {
-                ctx.fillStyle = s.color;
+            function drawPhoto(ctx, Wpx, Hpx, p) {
+                const cut = hasCutout(p);
+                ctx.fillStyle = cut ? p.color : '#ffffff';
                 ctx.fillRect(0, 0, Wpx, Hpx);
-                if (!cutout || !head) return;
 
-                const k = baseK * s.zoom / 100 * Hpx;
+                const img = cut ? p.cutout : p.img;
+                const cx = cut ? p.head.cx : p.w / 2;
+                const cy = cut ? p.head.cy : p.h / 2;
+                const k = p.baseK * p.zoom / 100 * Hpx;
+
                 ctx.save();
                 ctx.beginPath();
                 ctx.rect(0, 0, Wpx, Hpx);
                 ctx.clip();
-                ctx.translate(Wpx / 2 + pos.ox * Hpx, pos.oy * Hpx);
-                ctx.rotate(s.rotate * Math.PI / 180);
+                ctx.translate(Wpx / 2 + p.pos.ox * Hpx, p.pos.oy * Hpx);
+                ctx.rotate(p.rotate * Math.PI / 180);
                 ctx.scale(k, k);
                 ctx.imageSmoothingEnabled = true;
                 ctx.imageSmoothingQuality = 'high';
-                ctx.drawImage(cutout, -head.cx, -head.cy);
+                ctx.drawImage(img, -cx, -cy);
                 ctx.restore();
             }
 
+            /* =============== Tampilan: daftar foto =============== */
+            function renderPhotoList() {
+                const list = el('photo_list');
+                list.innerHTML = photos.map((p, i) => {
+                    const total = totalQty(p);
+                    let status = '';
+                    if (p.status === 'processing') {
+                        status = '<span class="spinner-border spinner-border-sm text-primary" title="Menghapus background"></span>';
+                    } else if (p.status === 'queued' && p.removeBg) {
+                        status = '<span class="badge bg-light text-muted">Antri</span>';
+                    } else if (p.status === 'error') {
+                        status = '<span class="badge bg-danger">Gagal</span>';
+                    } else if (!p.removeBg) {
+                        status = '<span class="badge bg-light text-muted">Asli</span>';
+                    }
+                    return `
+                        <div class="photo-item ${p.id === activeId ? 'active' : ''}" data-id="${p.id}">
+                            <canvas class="photo-thumb" width="90" height="120" data-id="${p.id}"></canvas>
+                            <div class="flex-grow-1" style="min-width:0">
+                                <div class="fw-semibold">Foto ${i + 1}</div>
+                                <div class="fs-7 ${total ? 'text-muted' : 'text-warning'}">
+                                    ${total ? `${total} lembar` : 'Jumlah belum diisi'}
+                                </div>
+                            </div>
+                            ${status}
+                            <button type="button" class="btn btn-sm btn-light text-danger remove-photo" data-id="${p.id}" title="Hapus foto">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>`;
+                }).join('');
+
+                list.querySelectorAll('canvas.photo-thumb').forEach(c => {
+                    const p = photos.find(x => x.id === Number(c.dataset.id));
+                    if (p) drawPhoto(c.getContext('2d'), c.width, c.height, p);
+                });
+            }
+
+            /* =============== Tampilan: pengaturan foto terpilih =============== */
+            function syncControls() {
+                const p = activePhoto();
+                const idx = p ? photos.indexOf(p) + 1 : 0;
+                el('active_title').textContent = p ? `Foto ${idx}` : 'Foto';
+                el('editor_title').textContent = p ? `· Foto ${idx}` : '';
+                el('photo_settings').style.display = p ? 'block' : 'none';
+                el('no_photo_note').style.display = p ? 'none' : 'block';
+                if (!p) return;
+
+                el('remove_bg').checked = p.removeBg;
+                el('color_section').style.display = p.removeBg ? 'block' : 'none';
+                el('bg_color').value = p.color;
+                el('zoom').value = p.zoom;
+                el('rotate').value = p.rotate;
+
+                const st = {
+                    processing: '(sedang diproses...)',
+                    queued: p.removeBg ? '(menunggu antrian)' : '',
+                    error: '(gagal, coba nyalakan lagi)'
+                };
+                el('remove_bg_status').textContent = st[p.status] || '';
+            }
+
+            function renderSizes() {
+                const p = activePhoto();
+                el('size_list').innerHTML = sizes.map(s => {
+                    const q = p ? (p.qty[s.id] || 0) : 0;
+                    return `
+                    <div class="size-row ${q > 0 ? 'has-qty' : ''}">
+                        <span class="size-label">${sizeLabel(s)}</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="input-group input-group-sm qty-group">
+                                <button class="btn btn-light qty-btn" type="button" data-id="${s.id}" data-step="-1"><i class="fas fa-minus"></i></button>
+                                <input type="number" class="form-control qty-input" min="0" max="200" value="${q}" data-id="${s.id}">
+                                <button class="btn btn-light qty-btn" type="button" data-id="${s.id}" data-step="1"><i class="fas fa-plus"></i></button>
+                            </div>
+                            ${s.custom ? `<button type="button" class="btn btn-sm btn-light text-danger remove-size" data-id="${s.id}" title="Hapus ukuran"><i class="fas fa-trash"></i></button>` : ''}
+                        </div>
+                    </div>`;
+                }).join('');
+                el('btn_copy_qty').style.display = photos.length > 1 ? 'block' : 'none';
+                renderTabs();
+            }
+
+            function renderTabs() {
+                const p = activePhoto();
+                const used = p ? sizes.filter(s => (p.qty[s.id] || 0) > 0) : [];
+                const list = used.length ? used : sizes;
+                if (!list.some(s => s.id === activeSizeId)) activeSizeId = list[0].id;
+
+                el('size_tabs').innerHTML = list.map(s => `
+                    <button type="button" class="btn btn-outline-secondary size-tab ${s.id === activeSizeId ? 'active' : ''}" data-id="${s.id}">
+                        ${sizeLabel(s).replace(' cm', '')}
+                    </button>`).join('');
+            }
+
+            function selectPhoto(id) {
+                activeId = id;
+                syncControls();
+                renderSizes();
+                refreshAll();
+            }
+
+            /* =============== Editor =============== */
             function activeSize() {
                 return sizes.find(x => x.id === activeSizeId) || sizes[0];
             }
 
             function renderEditor() {
                 const s = getSettings();
+                const p = activePhoto();
                 const size = activeSize();
-                const cssH = Math.min(380, window.innerWidth < 576 ? 300 : 380);
+                const cssH = window.innerWidth < 576 ? 300 : 380;
                 const cssW = cssH * size.w / size.h;
                 const dpr = window.devicePixelRatio || 1;
 
@@ -846,7 +1094,20 @@
 
                 const ctx = editor.getContext('2d');
                 ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-                drawPhoto(ctx, cssW, cssH, s);
+
+                if (!p) {
+                    ctx.fillStyle = '#e4e6ef';
+                    ctx.fillRect(0, 0, cssW, cssH);
+                    ctx.fillStyle = '#7e8299';
+                    ctx.font = '14px Poppins, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Belum ada foto', cssW / 2, cssH / 2);
+                    el('editor_overlay').style.display = 'none';
+                    el('edge_warning').style.display = 'none';
+                    return;
+                }
+
+                drawPhoto(ctx, cssW, cssH, p);
 
                 // Garis bantu
                 ctx.save();
@@ -856,40 +1117,57 @@
                 ctx.beginPath();
                 ctx.moveTo(cssW / 2, 0);
                 ctx.lineTo(cssW / 2, cssH);
-                const yTop = cssH * s.topPct / 100;
-                const yNeck = cssH * (s.topPct + s.headPct) / 100;
-                ctx.moveTo(0, yTop);
-                ctx.lineTo(cssW, yTop);
-                ctx.moveTo(0, yNeck);
-                ctx.lineTo(cssW, yNeck);
+                if (hasCutout(p)) {
+                    const yTop = cssH * s.topPct / 100;
+                    const yNeck = cssH * (s.topPct + s.headPct) / 100;
+                    ctx.moveTo(0, yTop);
+                    ctx.lineTo(cssW, yTop);
+                    ctx.moveTo(0, yNeck);
+                    ctx.lineTo(cssW, yNeck);
+                }
                 ctx.stroke();
                 ctx.restore();
 
-                if (!cutout) {
-                    ctx.fillStyle = 'rgba(255,255,255,0.9)';
-                    ctx.font = '14px Poppins, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('Belum ada foto', cssW / 2, cssH / 2);
-                }
+                const overlay = el('editor_overlay');
+                const msg = p.status === 'processing' ? 'Menghapus background...' :
+                    (p.status === 'queued' && p.removeBg) ? 'Menunggu giliran hapus background...' : '';
+                overlay.textContent = msg;
+                overlay.style.display = msg ? 'block' : 'none';
 
-                checkEdges(cssW / cssH, s);
+                checkEdges(cssW / cssH, p);
             }
 
-            // Peringatan bila potongan badan di tepi foto asli terlihat di dalam pas foto
-            function checkEdges(ratio, s) {
+            function checkEdges(ratio, p) {
+                const k = p.baseK * p.zoom / 100;
                 const msgs = [];
-                if (cutout && head && edges) {
-                    const k = baseK * s.zoom / 100;
-                    const left = ratio / 2 + pos.ox - head.cx * k;
-                    const right = ratio / 2 + pos.ox + (cutout.naturalWidth - head.cx) * k;
-                    const bottom = pos.oy + (cutout.naturalHeight - head.cy) * k;
-                    if (edges.bottom && bottom < 0.995) msgs.push('bagian bawah badan');
-                    if (edges.left && left > 0.005) msgs.push('sisi kiri');
-                    if (edges.right && right < ratio - 0.005) msgs.push('sisi kanan');
+                let text = '';
+
+                if (hasCutout(p)) {
+                    // Potongan badan di tepi foto asli terlihat di dalam pas foto
+                    if (p.edges) {
+                        const left = ratio / 2 + p.pos.ox - p.head.cx * k;
+                        const right = ratio / 2 + p.pos.ox + (p.cutout.naturalWidth - p.head.cx) * k;
+                        const bottom = p.pos.oy + (p.cutout.naturalHeight - p.head.cy) * k;
+                        if (p.edges.bottom && bottom < 0.995) msgs.push('bagian bawah badan');
+                        if (p.edges.left && left > 0.005) msgs.push('sisi kiri');
+                        if (p.edges.right && right < ratio - 0.005) msgs.push('sisi kanan');
+                    }
+                    if (msgs.length) text = `Potongan foto asli terlihat di ${msgs.join(', ')}. Perbesar zoom atau geser foto.`;
+                } else if (p.status !== 'processing' && !(p.status === 'queued' && p.removeBg)) {
+                    // Foto asli harus menutupi seluruh bingkai
+                    const left = ratio / 2 + p.pos.ox - (p.w / 2) * k;
+                    const right = ratio / 2 + p.pos.ox + (p.w / 2) * k;
+                    const top = p.pos.oy - (p.h / 2) * k;
+                    const bottom = p.pos.oy + (p.h / 2) * k;
+                    if (left > 0.005) msgs.push('kiri');
+                    if (right < ratio - 0.005) msgs.push('kanan');
+                    if (top > 0.005) msgs.push('atas');
+                    if (bottom < 0.995) msgs.push('bawah');
+                    if (msgs.length) text = `Ada area kosong (putih) di sisi ${msgs.join(', ')}. Perbesar zoom atau geser foto.`;
                 }
-                el('edge_warning').style.display = msgs.length ? 'block' : 'none';
-                el('edge_warning_text').textContent = msgs.length ?
-                    `Potongan foto asli terlihat di ${msgs.join(', ')}. Perbesar zoom atau geser foto.` : '';
+
+                el('edge_warning').style.display = text ? 'block' : 'none';
+                el('edge_warning_text').textContent = text;
             }
 
             /* =============== Susunan di A4 (MaxRects, boleh diputar) =============== */
@@ -954,7 +1232,15 @@
                         rest.push(it);
                         continue;
                     }
-                    placed.push({ size: it.size, x: best.x, y: best.y, cw: best.w, ch: best.h, rot: best.rot });
+                    placed.push({
+                        photo: it.photo,
+                        size: it.size,
+                        x: best.x,
+                        y: best.y,
+                        cw: best.w,
+                        ch: best.h,
+                        rot: best.rot
+                    });
                     free = splitFree(free, best);
                 }
                 return { placed, rest };
@@ -983,10 +1269,13 @@
 
             function buildLayout(s) {
                 const items = [];
-                sizes.forEach(size => {
-                    for (let i = 0; i < size.qty; i++) {
-                        items.push({ size, w: size.w * 10 + s.border * 2, h: size.h * 10 + s.border * 2 });
-                    }
+                photos.forEach(photo => {
+                    sizes.forEach(size => {
+                        const q = photo.qty[size.id] || 0;
+                        for (let i = 0; i < q; i++) {
+                            items.push({ photo, size, w: size.w * 10 + s.border * 2, h: size.h * 10 + s.border * 2 });
+                        }
+                    });
                 });
                 if (!items.length) return { pages: [], total: 0 };
 
@@ -1029,11 +1318,11 @@
                 jelas: { gray: 150, width: 0.15 }
             };
 
-            function renderPhotoCanvas(size, pxPerMm, s, rotated = false) {
+            function renderPhotoCanvas(photo, size, pxPerMm, rotated = false) {
                 const c = document.createElement('canvas');
                 c.width = Math.max(1, Math.round(size.w * 10 * pxPerMm));
                 c.height = Math.max(1, Math.round(size.h * 10 * pxPerMm));
-                drawPhoto(c.getContext('2d'), c.width, c.height, s);
+                drawPhoto(c.getContext('2d'), c.width, c.height, photo);
                 if (!rotated) return c;
 
                 // Putar 90° searah jarum jam
@@ -1047,14 +1336,15 @@
                 return r;
             }
 
+            const cellKey = (cell) => `p${cell.photo.id}_${cell.size.id}${cell.rot ? '_r' : ''}`;
+
             function renderPreviews() {
                 const s = getSettings();
                 const wrap = el('page_previews');
                 wrap.innerHTML = '';
 
                 const layout = buildLayout(s);
-                const hasQty = sizes.some(x => x.qty > 0);
-                el('empty_preview').style.display = cutout && hasQty ? 'none' : 'block';
+                el('empty_preview').style.display = layout.total ? 'none' : 'block';
 
                 if (layout.error) {
                     el('layout_summary').innerHTML = `<span class="text-danger">${layout.error}</span>`;
@@ -1062,10 +1352,11 @@
                 }
                 el('layout_summary').textContent = layout.total ?
                     `${layout.total} foto · ${layout.pages.length} lembar A4` : '';
-                if (!cutout || !layout.total) return;
+                if (!layout.total) return;
 
                 const P = PREVIEW_PX_PER_MM;
                 const cache = {};
+                const cut = CUT_STYLES[s.cutStyle];
                 layout.pages.forEach((page, i) => {
                     const c = document.createElement('canvas');
                     c.width = A4_W * P;
@@ -1074,10 +1365,9 @@
                     ctx.fillStyle = '#ffffff';
                     ctx.fillRect(0, 0, c.width, c.height);
 
-                    const cut = CUT_STYLES[s.cutStyle];
                     page.forEach(cell => {
-                        const key = cell.size.id + (cell.rot ? '_r' : '');
-                        if (!cache[key]) cache[key] = renderPhotoCanvas(cell.size, P, s, cell.rot);
+                        const key = cellKey(cell);
+                        if (!cache[key]) cache[key] = renderPhotoCanvas(cell.photo, cell.size, P, cell.rot);
                         ctx.drawImage(cache[key], (cell.x + s.border) * P, (cell.y + s.border) * P,
                             (cell.cw - s.border * 2) * P, (cell.ch - s.border * 2) * P);
                         if (cut) {
@@ -1105,7 +1395,7 @@
 
             /* =============== Buat PDF =============== */
             async function generatePdf() {
-                if (busy || !cutout) return;
+                if (busy || queueRunning) return;
                 const s = getSettings();
                 const layout = buildLayout(s);
                 if (layout.error) {
@@ -1132,9 +1422,9 @@
                     layout.pages.forEach((page, i) => {
                         if (i > 0) doc.addPage('a4', 'portrait');
                         page.forEach(cell => {
-                            const key = cell.size.id + (cell.rot ? '_r' : '');
+                            const key = cellKey(cell);
                             if (!images[key]) {
-                                images[key] = renderPhotoCanvas(cell.size, pxPerMm, s, cell.rot)
+                                images[key] = renderPhotoCanvas(cell.photo, cell.size, pxPerMm, cell.rot)
                                     .toDataURL('image/jpeg', 0.95);
                             }
                             // alias yang sama -> foto disimpan sekali saja di PDF
@@ -1167,11 +1457,17 @@
                 const btn = el('btn_generate');
                 btn.querySelector('.indicator-label').style.display = generating ? 'none' : 'inline';
                 btn.querySelector('.indicator-progress').style.display = generating ? 'inline' : 'none';
-                const ready = !!cutout && !busy;
-                btn.disabled = !ready || !sizes.some(x => x.qty > 0);
-                el('btn_auto').disabled = !ready;
-                el('zoom').disabled = !ready;
-                el('rotate').disabled = !ready;
+
+                const p = activePhoto();
+                const anyQty = photos.some(x => totalQty(x) > 0);
+                btn.disabled = busy || queueRunning || !anyQty;
+                el('loading-text').textContent = generating ? 'Membuat PDF...' :
+                    (queueRunning && anyQty ? 'Tunggu hapus background selesai...' : '');
+
+                const editable = !!p && !busy;
+                el('btn_auto').disabled = !editable;
+                el('zoom').disabled = !editable;
+                el('rotate').disabled = !editable;
             }
 
             function updateSliderLabels() {
@@ -1182,7 +1478,8 @@
             }
 
             function updateSwatches() {
-                const color = el('bg_color').value.toLowerCase();
+                const p = activePhoto();
+                const color = p ? p.color.toLowerCase() : '';
                 document.querySelectorAll('.swatch').forEach(sw => {
                     sw.classList.toggle('active', sw.dataset.color === color);
                 });
@@ -1192,19 +1489,20 @@
                 updateSliderLabels();
                 updateSwatches();
                 updateButtons();
+                renderPhotoList();
                 renderEditor();
                 schedulePreviews();
             }
 
             /* =============== Event =============== */
-            // Tempel foto
+            // Tempel foto (bisa beberapa sekaligus)
             document.addEventListener('paste', (e) => {
                 const items = e.clipboardData ? Array.from(e.clipboardData.items) : [];
-                const file = items.filter(it => it.kind === 'file' && it.type.startsWith('image/'))
-                    .map(it => it.getAsFile())[0];
-                if (!file) return;
+                const files = items.filter(it => it.kind === 'file' && it.type.startsWith('image/'))
+                    .map(it => it.getAsFile()).filter(Boolean);
+                if (!files.length) return;
                 e.preventDefault();
-                processFile(file);
+                addFiles(files);
             });
 
             // Seret & pilih file
@@ -1214,47 +1512,78 @@
             dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
             dropZone.addEventListener('drop', (e) => {
                 dropZone.classList.remove('dragover');
-                processFile(e.dataTransfer.files[0]);
+                addFiles(e.dataTransfer.files);
             });
             dropZone.addEventListener('click', () => el('file_input').click());
             el('file_input').addEventListener('change', function() {
-                processFile(this.files[0]);
+                addFiles(this.files);
                 this.value = '';
             });
 
-            // Warna
-            document.querySelectorAll('.swatch').forEach(sw => {
-                sw.addEventListener('click', () => {
-                    el('bg_color').value = sw.dataset.color;
-                    saveSettings();
-                    refreshAll();
-                });
-            });
-            el('bg_color').addEventListener('input', () => {
-                saveSettings();
-                refreshAll();
+            // Daftar foto: pilih / hapus
+            el('photo_list').addEventListener('click', (e) => {
+                const rm = e.target.closest('.remove-photo');
+                if (rm) {
+                    removePhoto(Number(rm.dataset.id));
+                    return;
+                }
+                const item = e.target.closest('.photo-item');
+                if (item) selectPhoto(Number(item.dataset.id));
             });
 
-            // Jumlah & ukuran
-            function setQty(id, qty) {
-                const size = sizes.find(x => x.id === id);
-                if (!size) return;
-                size.qty = Math.max(0, Math.min(200, Math.round(qty) || 0));
-                if (size.qty > 0) activeSizeId = id;
+            el('auto_remove').addEventListener('change', saveSettings);
+
+            // Hapus background per foto
+            el('remove_bg').addEventListener('change', function() {
+                const p = activePhoto();
+                if (!p) return;
+                p.removeBg = this.checked;
+                if (p.removeBg && !p.cutout && p.status !== 'processing') p.status = 'queued';
+                if (!p.removeBg && p.status === 'error') p.status = 'ready';
+                autoPosition(p);
+                syncControls();
+                refreshAll();
+                if (p.removeBg) runQueue();
+            });
+
+            // Warna
+            function setColor(color) {
+                const p = activePhoto();
+                if (!p) return;
+                p.color = color;
+                lastColor = color;
+                el('bg_color').value = color;
+                saveSettings();
+                refreshAll();
+            }
+            document.querySelectorAll('.swatch').forEach(sw => {
+                sw.addEventListener('click', () => setColor(sw.dataset.color));
+            });
+            el('bg_color').addEventListener('input', function() {
+                setColor(this.value);
+            });
+
+            // Jumlah & ukuran (per foto)
+            function setQty(sizeId, qty) {
+                const p = activePhoto();
+                if (!p) return;
+                p.qty[sizeId] = Math.max(0, Math.min(200, Math.round(qty) || 0));
+                if (p.qty[sizeId] > 0) activeSizeId = sizeId;
                 renderSizes();
                 refreshAll();
             }
 
             el('size_list').addEventListener('click', (e) => {
                 const btn = e.target.closest('.qty-btn');
-                if (btn) {
-                    const size = sizes.find(x => x.id === btn.dataset.id);
-                    setQty(btn.dataset.id, size.qty + Number(btn.dataset.step));
+                const p = activePhoto();
+                if (btn && p) {
+                    setQty(btn.dataset.id, (p.qty[btn.dataset.id] || 0) + Number(btn.dataset.step));
                     return;
                 }
                 const rm = e.target.closest('.remove-size');
                 if (rm) {
                     sizes = sizes.filter(x => x.id !== rm.dataset.id);
+                    photos.forEach(x => delete x.qty[rm.dataset.id]);
                     saveSettings();
                     renderSizes();
                     refreshAll();
@@ -1262,6 +1591,22 @@
             });
             el('size_list').addEventListener('change', (e) => {
                 if (e.target.classList.contains('qty-input')) setQty(e.target.dataset.id, parseFloat(e.target.value));
+            });
+
+            el('btn_copy_qty').addEventListener('click', () => {
+                const p = activePhoto();
+                if (!p) return;
+                photos.forEach(x => {
+                    if (x !== p) x.qty = { ...p.qty };
+                });
+                refreshAll();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Jumlah disamakan',
+                    text: `Semua foto sekarang memakai jumlah yang sama dengan Foto ${photos.indexOf(p) + 1}.`,
+                    timer: 1800,
+                    showConfirmButton: false
+                });
             });
 
             el('btn_add_size').addEventListener('click', () => {
@@ -1295,31 +1640,62 @@
                 });
             });
 
-            // Slider
-            ['zoom', 'rotate'].forEach(id => el(id).addEventListener('input', refreshAll));
+            // Slider zoom & putar (foto terpilih)
+            el('zoom').addEventListener('input', function() {
+                const p = activePhoto();
+                if (p) p.zoom = parseFloat(this.value) || 100;
+                updateSliderLabels();
+                renderEditor();
+                schedulePreviews();
+            });
+            el('rotate').addEventListener('input', function() {
+                const p = activePhoto();
+                if (p) p.rotate = parseFloat(this.value) || 0;
+                updateSliderLabels();
+                renderEditor();
+                schedulePreviews();
+            });
+            ['zoom', 'rotate'].forEach(id => el(id).addEventListener('change', renderPhotoList));
+
+            // Patokan posisi otomatis (berlaku untuk foto yang dihapus background-nya)
             ['head_pct', 'top_pct'].forEach(id => {
                 el(id).addEventListener('input', () => {
                     saveSettings();
                     updateSliderLabels();
                     renderEditor();
                 });
-                el(id).addEventListener('change', autoPosition);
+                el(id).addEventListener('change', () => {
+                    const p = activePhoto();
+                    if (p && hasCutout(p)) {
+                        autoPosition(p);
+                        syncControls();
+                    }
+                    refreshAll();
+                });
             });
-            el('btn_auto').addEventListener('click', autoPosition);
+
+            el('btn_auto').addEventListener('click', () => {
+                const p = activePhoto();
+                if (!p) return;
+                autoPosition(p);
+                syncControls();
+                refreshAll();
+            });
 
             // Geser foto di editor
             let drag = null;
             editor.addEventListener('pointerdown', (e) => {
-                if (!cutout || busy) return;
+                if (!activePhoto() || busy) return;
                 drag = { x: e.clientX, y: e.clientY };
                 editor.setPointerCapture(e.pointerId);
                 editor.classList.add('dragging');
             });
             editor.addEventListener('pointermove', (e) => {
-                if (!drag) return;
+                const p = activePhoto();
+                if (!drag || !p) return;
                 const h = editor.getBoundingClientRect().height;
-                pos.ox += (e.clientX - drag.x) / h;
-                pos.oy += (e.clientY - drag.y) / h;
+                p.pos.ox += (e.clientX - drag.x) / h;
+                p.pos.oy += (e.clientY - drag.y) / h;
                 drag = { x: e.clientX, y: e.clientY };
                 renderEditor();
             });
@@ -1327,6 +1703,7 @@
                 if (!drag) return;
                 drag = null;
                 editor.classList.remove('dragging');
+                renderPhotoList();
                 schedulePreviews();
             };
             editor.addEventListener('pointerup', endDrag);
@@ -1334,11 +1711,15 @@
 
             // Zoom dengan scroll
             editor.addEventListener('wheel', (e) => {
-                if (!cutout || busy) return;
+                const p = activePhoto();
+                if (!p || busy) return;
                 e.preventDefault();
                 const z = el('zoom');
                 z.value = Math.max(+z.min, Math.min(+z.max, +z.value + (e.deltaY < 0 ? 5 : -5)));
-                refreshAll();
+                p.zoom = parseFloat(z.value);
+                updateSliderLabels();
+                renderEditor();
+                schedulePreviews();
             }, { passive: false });
 
             window.addEventListener('resize', renderEditor);
@@ -1346,8 +1727,8 @@
 
             // Mulai
             loadSettings();
-            renderSizes();
-            refreshAll();
+            el('bg_color').value = lastColor;
+            selectPhoto(null);
         })();
     </script>
 </body>

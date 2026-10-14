@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
 
     <style>
         body {
@@ -151,6 +152,31 @@
             right: -10px;
         }
 
+        .btn-crop-photo {
+            top: -10px;
+            right: -10px;
+        }
+
+        /* --- Jendela Crop --- */
+        .crop-container {
+            height: 55vh;
+            min-height: 280px;
+            background-color: #f5f8fa;
+            border-radius: 0.65rem;
+            overflow: hidden;
+        }
+
+        .crop-container img {
+            display: block;
+            max-width: 100%;
+        }
+
+        .ratio-btn.active {
+            background-color: #009ef7;
+            border-color: #009ef7;
+            color: #fff;
+        }
+
         .photo-number {
             position: absolute;
             top: 6px;
@@ -165,8 +191,8 @@
 
         .photo-warning {
             position: absolute;
-            top: 6px;
-            right: 6px;
+            bottom: 6px;
+            left: 6px;
             background-color: #ffc700;
             color: #181c32;
             font-size: 0.7rem;
@@ -398,7 +424,82 @@
         </div>
     </div>
 
+    {{-- ===== Jendela Crop ===== --}}
+    <div class="modal fade" id="crop_modal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="fw-bold fs-4 mb-0">Crop Foto <span class="text-muted" id="crop_photo_no"></span></h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="d-flex flex-wrap gap-2 mb-3" id="crop_ratios">
+                        <button type="button" class="btn btn-sm btn-light ratio-btn" data-ratio="free">Bebas</button>
+                        <button type="button" class="btn btn-sm btn-light ratio-btn" data-ratio="paper-p">
+                            <i class="fas fa-file me-1"></i>Penuh Kertas (Portrait)
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light ratio-btn" data-ratio="paper-l">
+                            <i class="fas fa-file fa-rotate-90 me-1"></i>Penuh Kertas (Landscape)
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light ratio-btn" data-ratio="1">1:1</button>
+                        <button type="button" class="btn btn-sm btn-light ratio-btn" data-ratio="0.75">3:4</button>
+                        <button type="button" class="btn btn-sm btn-light ratio-btn" data-ratio="1.3333">4:3</button>
+                        <button type="button" class="btn btn-sm btn-light ratio-btn" data-ratio="1.7778">16:9</button>
+                    </div>
+
+                    <div class="crop-container">
+                        <img id="crop_image" alt="">
+                    </div>
+
+                    <div class="row g-3 align-items-center mt-2">
+                        <div class="col-md-auto">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-light" id="btn_rotate_left" title="Putar kiri 90°">
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                                <button type="button" class="btn btn-light" id="btn_rotate_right" title="Putar kanan 90°">
+                                    <i class="fas fa-redo"></i>
+                                </button>
+                                <button type="button" class="btn btn-light" id="btn_crop_reset" title="Ulang dari awal">
+                                    <i class="fas fa-sync-alt me-1"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md">
+                            <label class="section-label d-flex justify-content-between mb-0">
+                                <span>Luruskan</span><span class="text-muted fw-normal" id="straighten_val">0°</span>
+                            </label>
+                            <input type="range" class="form-range" id="crop_straighten" min="-15" max="15"
+                                step="0.5" value="0">
+                        </div>
+                        <div class="col-md-auto text-muted fs-7">
+                            Hasil: <span id="crop_info">-</span>
+                        </div>
+                    </div>
+                    <div class="text-muted fs-7 mt-1">
+                        Seret kotak untuk memilih area, scroll untuk zoom foto.
+                        <b>Penuh Kertas</b> = foto memenuhi area cetak tanpa sisa putih.
+                    </div>
+                </div>
+
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-light text-danger" id="btn_crop_remove">
+                        <i class="fas fa-times me-1"></i> Hapus Crop
+                    </button>
+                    <div>
+                        <button type="button" class="btn btn-light me-2" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-primary" id="btn_crop_apply">
+                            <i class="fas fa-check me-1"></i> Terapkan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -414,7 +515,8 @@
             const el = (id) => document.getElementById(id);
             const grid = el('photo_grid');
 
-            let photos = []; // { id, url, w, h }
+            // srcUrl = foto asli, url = foto yang dipakai (hasil crop bila ada)
+            let photos = []; // { id, srcUrl, url, w, h, origW, origH, cropState }
             let uid = 0;
             let busy = false;
 
@@ -427,7 +529,7 @@
                     left: num('margin_left'),
                     right: num('margin_right'),
                     orientation: el('orientation').value,
-                    filename: el('file_name').value.trim() || 'cetak-foto'
+                    filename: el('file_name').value.trim() || 'merge-image'
                 };
             }
 
@@ -529,7 +631,16 @@
                     const url = URL.createObjectURL(f);
                     try {
                         const img = await loadImage(url);
-                        photos.push({ id: ++uid, url, w: img.naturalWidth, h: img.naturalHeight });
+                        photos.push({
+                            id: ++uid,
+                            srcUrl: url,
+                            url,
+                            w: img.naturalWidth,
+                            h: img.naturalHeight,
+                            origW: img.naturalWidth,
+                            origH: img.naturalHeight,
+                            cropState: null
+                        });
                     } catch (e) {
                         URL.revokeObjectURL(url);
                         failed++;
@@ -556,6 +667,9 @@
                             <div class="image-input-wrapper" style="background-image: url('${p.url}')"></div>
                             <span class="photo-number">${i + 1}</span>
                             ${low ? `<span class="photo-warning" title="Resolusi rendah (±${Math.round(lay.dpi)} DPI)"><i class="fas fa-exclamation-triangle"></i></span>` : ''}
+                            <span class="btn-circle btn-crop-photo shadow" data-id="${p.id}" title="${p.cropState ? 'Sudah di-crop, klik untuk ubah' : 'Crop'}">
+                                <i class="fas fa-crop-alt fs-7 ${p.cropState ? 'text-success' : 'text-primary-custom'}"></i>
+                            </span>
                             <span class="btn-circle btn-remove-photo shadow" data-id="${p.id}" title="Hapus">
                                 <i class="fas fa-times fs-7 text-danger-custom"></i>
                             </span>
@@ -673,8 +787,167 @@
             }
 
             /* ---------- Event ---------- */
+            function revokePhoto(p) {
+                if (p.url !== p.srcUrl) URL.revokeObjectURL(p.url);
+                URL.revokeObjectURL(p.srcUrl);
+            }
+
+            /* ---------- Crop ---------- */
+            const cropModalEl = el('crop_modal');
+            const cropModal = new bootstrap.Modal(cropModalEl);
+            let cropper = null;
+            let cropTarget = null;
+            let cropRatioKey = 'free';
+            let cropBase = 0; // putaran 90°
+            let cropFine = 0; // putaran halus (luruskan)
+
+            function ratioValue(key) {
+                const s = getSettings();
+                if (key === 'free') return NaN;
+                if (key === 'paper-p') return (210 - s.left - s.right) / (297 - s.top - s.bottom);
+                if (key === 'paper-l') return (297 - s.left - s.right) / (210 - s.top - s.bottom);
+                return parseFloat(key);
+            }
+
+            function setRatio(key) {
+                const val = ratioValue(key);
+                if (key !== 'free' && !(val > 0)) {
+                    Swal.fire('Margin terlalu besar', 'Tidak ada area cetak yang tersisa.', 'warning');
+                    return;
+                }
+                cropRatioKey = key;
+                document.querySelectorAll('.ratio-btn').forEach(b => b.classList.toggle('active', b.dataset.ratio === key));
+                if (cropper) cropper.setAspectRatio(val);
+            }
+
+            function applyRotation() {
+                el('straighten_val').textContent = cropFine + '°';
+                if (cropper) cropper.rotateTo(cropBase + cropFine);
+            }
+
+            function updateCropInfo() {
+                if (!cropper) return;
+                const d = cropper.getData(true);
+                el('crop_info').textContent = `${d.width} × ${d.height} px`;
+            }
+
+            function openCrop(id) {
+                if (busy) return;
+                const p = photos.find(x => x.id === id);
+                if (!p) return;
+                cropTarget = p;
+                const st = p.cropState;
+                cropRatioKey = st ? st.ratioKey : 'free';
+                cropBase = st ? st.base : 0;
+                cropFine = st ? st.fine : 0;
+                el('crop_straighten').value = cropFine;
+                el('straighten_val').textContent = cropFine + '°';
+                el('crop_photo_no').textContent = '#' + (photos.indexOf(p) + 1);
+                el('btn_crop_remove').style.visibility = st ? 'visible' : 'hidden';
+                el('crop_info').textContent = '-';
+                document.querySelectorAll('.ratio-btn').forEach(b => b.classList.toggle('active', b.dataset.ratio === cropRatioKey));
+                el('crop_image').src = p.srcUrl;
+                cropModal.show();
+            }
+
+            cropModalEl.addEventListener('shown.bs.modal', () => {
+                if (!cropTarget) return;
+                const st = cropTarget.cropState;
+                cropper = new Cropper(el('crop_image'), {
+                    viewMode: 1,
+                    autoCropArea: 1,
+                    checkOrientation: false, // browser sudah memutar foto HP dengan benar
+                    responsive: true,
+                    background: true,
+                    toggleDragModeOnDblclick: false,
+                    ready() {
+                        cropper.rotateTo(cropBase + cropFine);
+                        cropper.setAspectRatio(ratioValue(cropRatioKey));
+                        if (st) cropper.setData(st.data);
+                        updateCropInfo();
+                    },
+                    crop: updateCropInfo
+                });
+            });
+
+            cropModalEl.addEventListener('hidden.bs.modal', () => {
+                if (cropper) cropper.destroy();
+                cropper = null;
+                cropTarget = null;
+            });
+
+            el('crop_ratios').addEventListener('click', (e) => {
+                const b = e.target.closest('.ratio-btn');
+                if (b) setRatio(b.dataset.ratio);
+            });
+
+            el('btn_rotate_left').addEventListener('click', () => {
+                cropBase = (cropBase + 270) % 360;
+                applyRotation();
+            });
+            el('btn_rotate_right').addEventListener('click', () => {
+                cropBase = (cropBase + 90) % 360;
+                applyRotation();
+            });
+            el('crop_straighten').addEventListener('input', function() {
+                cropFine = parseFloat(this.value) || 0;
+                applyRotation();
+            });
+            el('btn_crop_reset').addEventListener('click', () => {
+                if (!cropper) return;
+                cropBase = 0;
+                cropFine = 0;
+                el('crop_straighten').value = 0;
+                el('straighten_val').textContent = '0°';
+                cropper.reset();
+                setRatio('free');
+            });
+
+            el('btn_crop_apply').addEventListener('click', async () => {
+                if (!cropper || !cropTarget) return;
+                const canvas = cropper.getCroppedCanvas({
+                    fillColor: '#ffffff',
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high',
+                    maxWidth: 8000,
+                    maxHeight: 8000
+                });
+                if (!canvas || !canvas.width || !canvas.height) {
+                    Swal.fire('Gagal', 'Area crop tidak valid.', 'error');
+                    return;
+                }
+
+                const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.95));
+                const p = cropTarget;
+                if (p.url !== p.srcUrl) URL.revokeObjectURL(p.url);
+                p.url = URL.createObjectURL(blob);
+                p.w = canvas.width;
+                p.h = canvas.height;
+                p.cropState = {
+                    data: cropper.getData(true),
+                    ratioKey: cropRatioKey,
+                    base: cropBase,
+                    fine: cropFine
+                };
+                cropModal.hide();
+                render();
+            });
+
+            el('btn_crop_remove').addEventListener('click', () => {
+                const p = cropTarget;
+                if (!p) return;
+                if (p.url !== p.srcUrl) URL.revokeObjectURL(p.url);
+                p.url = p.srcUrl;
+                p.w = p.origW;
+                p.h = p.origH;
+                p.cropState = null;
+                cropModal.hide();
+                render();
+            });
+
             // Tempel (Ctrl+V) di mana saja pada halaman
             document.addEventListener('paste', (e) => {
+                if (cropTarget) return; // jendela crop sedang terbuka
                 const items = e.clipboardData ? Array.from(e.clipboardData.items) : [];
                 const files = items.filter(it => it.kind === 'file').map(it => it.getAsFile()).filter(Boolean);
                 if (!files.length) return; // biarkan paste teks biasa ke input
@@ -699,15 +972,27 @@
                 this.value = '';
             });
 
-            // Hapus satu foto
+            // Crop / hapus satu foto
             grid.addEventListener('click', (e) => {
+                if (busy) return;
+                const cropBtn = e.target.closest('.btn-crop-photo');
+                if (cropBtn) {
+                    openCrop(Number(cropBtn.dataset.id));
+                    return;
+                }
                 const btn = e.target.closest('.btn-remove-photo');
-                if (!btn || busy) return;
+                if (!btn) return;
                 const id = Number(btn.dataset.id);
                 const p = photos.find(x => x.id === id);
-                if (p) URL.revokeObjectURL(p.url);
+                if (p) revokePhoto(p);
                 photos = photos.filter(x => x.id !== id);
                 render();
+            });
+
+            // Klik dua kali pada foto juga membuka crop
+            grid.addEventListener('dblclick', (e) => {
+                const item = e.target.closest('.image-input');
+                if (item && !e.target.closest('.btn-circle')) openCrop(Number(item.dataset.id));
             });
 
             // Hapus semua
@@ -720,7 +1005,7 @@
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (!result.isConfirmed) return;
-                    photos.forEach(p => URL.revokeObjectURL(p.url));
+                    photos.forEach(revokePhoto);
                     photos = [];
                     render();
                 });
@@ -730,7 +1015,7 @@
             new Sortable(grid, {
                 animation: 150,
                 ghostClass: 'sortable-ghost',
-                filter: '.btn-remove-photo',
+                filter: '.btn-remove-photo, .btn-crop-photo',
                 preventOnFilter: false,
                 onEnd: () => {
                     const order = Array.from(grid.querySelectorAll('.image-input')).map(n => Number(n.dataset.id));
